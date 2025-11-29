@@ -76,9 +76,19 @@ export default function CoursePage() {
         return subchapters?.filter(s => s.chapterId === chapId) || []
     }
 
+    // Get chapter number (based on order)
+    const getChapterNumber = (chapterOrder: number) => chapterOrder
+
+    // Get subchapter number (e.g., "3.2" for chapter 3, subchapter 2)
+    const getSubchapterNumber = (chapterOrder: number, subchapterOrder: number) =>
+        `${chapterOrder}.${subchapterOrder}`
+
     // Determine what content to display
     const displayContent = currentSubchapter?.content || currentChapter?.content || ''
-    const displayTitle = currentSubchapter?.title || currentChapter?.title || ''
+    const currentChapterNumber = currentChapter?.order || 1
+    const displayTitle = currentSubchapter
+        ? `${getSubchapterNumber(currentChapterNumber, currentSubchapter.order)} ${currentSubchapter.title}`
+        : `${currentChapterNumber}. ${currentChapter?.title || ''}`
 
     if (!course || !chapters || !currentChapter) {
         return (
@@ -121,13 +131,14 @@ export default function CoursePage() {
                                         ) : (
                                             <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                         )}
-                                        <span className="font-medium text-sm">{part.title}</span>
+                                        <span className="font-medium text-sm">Part {part.order}: {part.title}</span>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pl-4">
                                         <div className="space-y-1 border-l border-border ml-2 pl-2">
                                             {getChaptersForPart(part.partId).map((chapter) => {
                                                 const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
                                                 const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+                                                const chapterNum = getChapterNumber(chapter.order)
 
                                                 return (
                                                     <div key={chapter.id}>
@@ -141,7 +152,7 @@ export default function CoursePage() {
                                                             ) : (
                                                                 <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                                                             )}
-                                                            <span className="text-sm line-clamp-2">{chapter.title}</span>
+                                                            <span className="text-sm line-clamp-2">{chapterNum}. {chapter.title}</span>
                                                         </Link>
 
                                                         {/* Subchapters */}
@@ -149,6 +160,7 @@ export default function CoursePage() {
                                                             <div className="ml-6 space-y-1 border-l border-border/50 pl-2">
                                                                 {chapterSubchapters.map((subchapter) => {
                                                                     const isCurrentSubchapter = currentSubchapter?.id === subchapter.id
+                                                                    const subchapterNum = getSubchapterNumber(chapter.order, subchapter.order)
 
                                                                     return (
                                                                         <Link
@@ -162,7 +174,7 @@ export default function CoursePage() {
                                                                             ) : (
                                                                                 <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                                                                             )}
-                                                                            <span className="text-xs line-clamp-2">{subchapter.title}</span>
+                                                                            <span className="text-xs line-clamp-2">{subchapterNum} {subchapter.title}</span>
                                                                         </Link>
                                                                     )
                                                                 })}
@@ -180,6 +192,7 @@ export default function CoursePage() {
                             chapters.map((chapter) => {
                                 const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
                                 const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+                                const chapterNum = getChapterNumber(chapter.order)
 
                                 return (
                                     <div key={chapter.id}>
@@ -193,7 +206,7 @@ export default function CoursePage() {
                                             ) : (
                                                 <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                                             )}
-                                            <span className="text-sm line-clamp-2">{chapter.title}</span>
+                                            <span className="text-sm line-clamp-2">{chapterNum}. {chapter.title}</span>
                                         </Link>
 
                                         {/* Subchapters */}
@@ -201,6 +214,7 @@ export default function CoursePage() {
                                             <div className="ml-6 space-y-1 border-l border-border/50 pl-2">
                                                 {chapterSubchapters.map((subchapter) => {
                                                     const isCurrentSubchapter = currentSubchapter?.id === subchapter.id
+                                                    const subchapterNum = getSubchapterNumber(chapter.order, subchapter.order)
 
                                                     return (
                                                         <Link
@@ -214,7 +228,7 @@ export default function CoursePage() {
                                                             ) : (
                                                                 <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                                                             )}
-                                                            <span className="text-xs line-clamp-2">{subchapter.title}</span>
+                                                            <span className="text-xs line-clamp-2">{subchapterNum} {subchapter.title}</span>
                                                         </Link>
                                                     )
                                                 })}

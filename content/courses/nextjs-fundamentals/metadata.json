@@ -1,64 +1,380 @@
 {
     "id": "nextjs-fundamentals",
     "title": "Next.js Fundamentals",
-    "description": "Learn the basics of Next.js 14+, including App Router, Server Components, and more.",
+    "description": "A comprehensive bootcamp-style course covering Next.js 15+, React essentials, App Router, Server Components, Prisma, and production deployment. Designed as both a learning path and searchable reference documentation.",
     "author": "CourseApp",
+    "version": "1.0.0",
+    "nextjsVersion": "15+",
     "order": 1,
     "tags": [
         "nextjs",
         "react",
-        "web-development"
+        "web-development",
+        "app-router",
+        "server-components",
+        "prisma",
+        "tailwind"
     ],
-    "difficulty": "beginner",
-    "estimatedHours": 8,
+    "difficulty": "beginner-to-intermediate",
+    "estimatedHours": 20,
+    "prerequisites": [
+        "Basic programming knowledge",
+        "Familiarity with HTML/CSS",
+        "Understanding of how the web works"
+    ],
+    "parts": [
+        {
+            "id": "part-1",
+            "title": "Foundations",
+            "order": 1
+        },
+        {
+            "id": "part-2",
+            "title": "Core Next.js Concepts",
+            "order": 2
+        },
+        {
+            "id": "part-3",
+            "title": "Styling & UI",
+            "order": 3
+        },
+        {
+            "id": "part-4",
+            "title": "Backend & Data",
+            "order": 4
+        },
+        {
+            "id": "part-5",
+            "title": "Production Ready",
+            "order": 5
+        },
+        {
+            "id": "part-6",
+            "title": "Capstone",
+            "order": 6
+        },
+        {
+            "id": "appendix",
+            "title": "Appendix",
+            "order": 7
+        }
+    ],
     "chapters": [
         {
             "id": "01-introduction",
             "title": "Introduction to Next.js",
+            "part": "part-1",
             "order": 1,
-            "file": "01-introduction.md"
+            "file": "01-introduction.md",
+            "subchapters": []
         },
         {
-            "id": "02-getting-started",
-            "title": "Getting Started",
+            "id": "02-development-setup",
+            "title": "Development Environment Setup",
+            "part": "part-1",
             "order": 2,
-            "file": "02-getting-started.md"
+            "file": "02-development-setup.md",
+            "subchapters": []
         },
         {
-            "id": "03-app-router",
-            "title": "The App Router",
+            "id": "03-react-essentials",
+            "title": "React Essentials for Next.js",
+            "part": "part-1",
             "order": 3,
-            "file": "03-app-router.md"
+            "file": "03-react-essentials.md",
+            "subchapters": [
+                {
+                    "id": "03.1-components-jsx",
+                    "title": "Components & JSX",
+                    "order": 1,
+                    "file": "03.1-components-jsx.md"
+                },
+                {
+                    "id": "03.2-props-data-flow",
+                    "title": "Props & Data Flow",
+                    "order": 2,
+                    "file": "03.2-props-data-flow.md"
+                },
+                {
+                    "id": "03.3-state-events",
+                    "title": "State & Event Handling",
+                    "order": 3,
+                    "file": "03.3-state-events.md"
+                },
+                {
+                    "id": "03.4-hooks",
+                    "title": "Hooks",
+                    "order": 4,
+                    "file": "03.4-hooks.md"
+                },
+                {
+                    "id": "03.5-conditional-rendering-lists",
+                    "title": "Conditional Rendering & Lists",
+                    "order": 5,
+                    "file": "03.5-conditional-rendering-lists.md"
+                }
+            ]
         },
         {
-            "id": "04-server-components",
-            "title": "Server Components vs Client Components",
+            "id": "04-app-router",
+            "title": "The App Router",
+            "part": "part-2",
             "order": 4,
-            "file": "04-server-components.md"
+            "file": "04-app-router.md",
+            "subchapters": [
+                {
+                    "id": "04.1-file-conventions",
+                    "title": "File Conventions",
+                    "order": 1,
+                    "file": "04.1-file-conventions.md"
+                },
+                {
+                    "id": "04.2-route-groups",
+                    "title": "Route Groups & Organization",
+                    "order": 2,
+                    "file": "04.2-route-groups.md"
+                }
+            ]
         },
         {
-            "id": "05-data-fetching",
-            "title": "Data Fetching",
+            "id": "05-routing-navigation",
+            "title": "Routing & Navigation",
+            "part": "part-2",
             "order": 5,
-            "file": "05-data-fetching.md"
+            "file": "05-routing-navigation.md",
+            "subchapters": [
+                {
+                    "id": "05.1-dynamic-routes",
+                    "title": "Dynamic Routes",
+                    "order": 1,
+                    "file": "05.1-dynamic-routes.md"
+                },
+                {
+                    "id": "05.2-parallel-intercepting-routes",
+                    "title": "Parallel & Intercepting Routes",
+                    "order": 2,
+                    "file": "05.2-parallel-intercepting-routes.md"
+                },
+                {
+                    "id": "05.3-navigation",
+                    "title": "Navigation",
+                    "order": 3,
+                    "file": "05.3-navigation.md"
+                }
+            ]
         },
         {
-            "id": "06-styling",
-            "title": "Styling in Next.js",
+            "id": "06-server-client-components",
+            "title": "Server Components vs Client Components",
+            "part": "part-2",
             "order": 6,
-            "file": "06-styling.md"
+            "file": "06-server-client-components.md",
+            "subchapters": [
+                {
+                    "id": "06.1-mental-model",
+                    "title": "The Mental Model",
+                    "order": 1,
+                    "file": "06.1-mental-model.md"
+                },
+                {
+                    "id": "06.2-composition-patterns",
+                    "title": "Composition Patterns",
+                    "order": 2,
+                    "file": "06.2-composition-patterns.md"
+                },
+                {
+                    "id": "06.3-common-mistakes",
+                    "title": "Common Mistakes & Gotchas",
+                    "order": 3,
+                    "file": "06.3-common-mistakes.md"
+                }
+            ]
         },
         {
-            "id": "07-api-routes",
-            "title": "API Routes",
+            "id": "07-data-fetching",
+            "title": "Data Fetching",
+            "part": "part-2",
             "order": 7,
-            "file": "07-api-routes.md"
+            "file": "07-data-fetching.md",
+            "subchapters": [
+                {
+                    "id": "07.1-fetching-server-components",
+                    "title": "Fetching in Server Components",
+                    "order": 1,
+                    "file": "07.1-fetching-server-components.md"
+                },
+                {
+                    "id": "07.2-caching-revalidation",
+                    "title": "Caching & Revalidation",
+                    "order": 2,
+                    "file": "07.2-caching-revalidation.md"
+                },
+                {
+                    "id": "07.3-loading-error-states",
+                    "title": "Loading & Error States",
+                    "order": 3,
+                    "file": "07.3-loading-error-states.md"
+                }
+            ]
         },
         {
-            "id": "08-deployment",
-            "title": "Deployment & Best Practices",
+            "id": "08-server-actions-forms",
+            "title": "Server Actions & Forms",
+            "part": "part-2",
             "order": 8,
-            "file": "08-deployment.md"
+            "file": "08-server-actions-forms.md",
+            "subchapters": [
+                {
+                    "id": "08.1-server-actions-basics",
+                    "title": "Server Actions Basics",
+                    "order": 1,
+                    "file": "08.1-server-actions-basics.md"
+                },
+                {
+                    "id": "08.2-form-handling-validation",
+                    "title": "Form Handling & Validation",
+                    "order": 2,
+                    "file": "08.2-form-handling-validation.md"
+                },
+                {
+                    "id": "08.3-optimistic-updates",
+                    "title": "Optimistic Updates",
+                    "order": 3,
+                    "file": "08.3-optimistic-updates.md"
+                }
+            ]
+        },
+        {
+            "id": "09-styling",
+            "title": "Styling in Next.js",
+            "part": "part-3",
+            "order": 9,
+            "file": "09-styling.md",
+            "subchapters": [
+                {
+                    "id": "09.1-css-modules",
+                    "title": "CSS Modules",
+                    "order": 1,
+                    "file": "09.1-css-modules.md"
+                },
+                {
+                    "id": "09.2-tailwind-css",
+                    "title": "Tailwind CSS",
+                    "order": 2,
+                    "file": "09.2-tailwind-css.md"
+                },
+                {
+                    "id": "09.3-global-styles",
+                    "title": "Global Styles & Best Practices",
+                    "order": 3,
+                    "file": "09.3-global-styles.md"
+                }
+            ]
+        },
+        {
+            "id": "10-images-fonts-metadata",
+            "title": "Images, Fonts & Metadata",
+            "part": "part-3",
+            "order": 10,
+            "file": "10-images-fonts-metadata.md",
+            "subchapters": [
+                {
+                    "id": "10.1-image-optimization",
+                    "title": "Image Optimization",
+                    "order": 1,
+                    "file": "10.1-image-optimization.md"
+                },
+                {
+                    "id": "10.2-fonts",
+                    "title": "Fonts",
+                    "order": 2,
+                    "file": "10.2-fonts.md"
+                },
+                {
+                    "id": "10.3-metadata-seo",
+                    "title": "Metadata & SEO",
+                    "order": 3,
+                    "file": "10.3-metadata-seo.md"
+                }
+            ]
+        },
+        {
+            "id": "11-api-routes",
+            "title": "API Routes (Route Handlers)",
+            "part": "part-4",
+            "order": 11,
+            "file": "11-api-routes.md",
+            "subchapters": [
+                {
+                    "id": "11.1-prisma-database",
+                    "title": "Database with Prisma",
+                    "order": 1,
+                    "file": "11.1-prisma-database.md"
+                }
+            ]
+        },
+        {
+            "id": "12-authentication-patterns",
+            "title": "Authentication Patterns",
+            "part": "part-4",
+            "order": 12,
+            "file": "12-authentication-patterns.md",
+            "subchapters": [
+                {
+                    "id": "12.1-protecting-routes-middleware",
+                    "title": "Protecting Routes & Middleware",
+                    "order": 1,
+                    "file": "12.1-protecting-routes-middleware.md"
+                }
+            ]
+        },
+        {
+            "id": "13-error-handling-debugging",
+            "title": "Error Handling & Debugging",
+            "part": "part-5",
+            "order": 13,
+            "file": "13-error-handling-debugging.md",
+            "subchapters": []
+        },
+        {
+            "id": "14-performance-optimization",
+            "title": "Performance & Optimization",
+            "part": "part-5",
+            "order": 14,
+            "file": "14-performance-optimization.md",
+            "subchapters": []
+        },
+        {
+            "id": "15-deployment",
+            "title": "Deployment",
+            "part": "part-5",
+            "order": 15,
+            "file": "15-deployment.md",
+            "subchapters": []
+        },
+        {
+            "id": "16-capstone-portfolio",
+            "title": "Project: Developer Portfolio",
+            "part": "part-6",
+            "order": 16,
+            "file": "16-capstone-portfolio.md",
+            "subchapters": []
+        },
+        {
+            "id": "17-resources-references",
+            "title": "Resources & References",
+            "part": "appendix",
+            "order": 17,
+            "file": "17-resources-references.md",
+            "subchapters": []
+        },
+        {
+            "id": "18-quick-reference",
+            "title": "Quick Reference / Cheat Sheet",
+            "part": "appendix",
+            "order": 18,
+            "file": "18-quick-reference.md",
+            "subchapters": []
         }
     ]
 }
