@@ -11,12 +11,19 @@ import { Plus, Trash2, Save } from "lucide-react"
 
 interface NoteTakerProps {
     courseId: string
+    chapterId?: string
 }
 
-export function NoteTaker({ courseId }: NoteTakerProps) {
+export function NoteTaker({ courseId, chapterId }: NoteTakerProps) {
     const notes = useLiveQuery(
-        () => db.notes.where("courseId").equals(courseId).reverse().sortBy("createdAt"),
-        [courseId]
+        () => {
+            let query = db.notes.where('courseId').equals(courseId)
+            if (chapterId) {
+                return query.and(note => note.chapterId === chapterId).reverse().sortBy('createdAt')
+            }
+            return query.reverse().sortBy('createdAt')
+        },
+        [courseId, chapterId]
     )
 
     const [isAdding, setIsAdding] = useState(false)
@@ -29,6 +36,7 @@ export function NoteTaker({ courseId }: NoteTakerProps) {
         await db.notes.add({
             id: crypto.randomUUID(),
             courseId,
+            chapterId,
             title: newTitle,
             content: newContent,
             createdAt: Date.now(),

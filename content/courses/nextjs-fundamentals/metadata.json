@@ -1,0 +1,64 @@
+{
+    "id": "nextjs-fundamentals",
+    "title": "Next.js Fundamentals",
+    "description": "Learn the basics of Next.js 14+, including App Router, Server Components, and more.",
+    "author": "CourseApp",
+    "order": 1,
+    "tags": [
+        "nextjs",
+        "react",
+        "web-development"
+    ],
+    "difficulty": "beginner",
+    "estimatedHours": 8,
+    "chapters": [
+        {
+            "id": "01-introduction",
+            "title": "Introduction to Next.js",
+            "order": 1,
+            "file": "01-introduction.md"
+        },
+        {
+            "id": "02-getting-started",
+            "title": "Getting Started",
+            "order": 2,
+            "file": "02-getting-started.md"
+        },
+        {
+            "id": "03-app-router",
+            "title": "The App Router",
+            "order": 3,
+            "file": "03-app-router.md"
+        },
+        {
+            "id": "04-server-components",
+            "title": "Server Components vs Client Components",
+            "order": 4,
+            "file": "04-server-components.md"
+        },
+        {
+            "id": "05-data-fetching",
+            "title": "Data Fetching",
+            "order": 5,
+            "file": "05-data-fetching.md"
+        },
+        {
+            "id": "06-styling",
+            "title": "Styling in Next.js",
+            "order": 6,
+            "file": "06-styling.md"
+        },
+        {
+            "id": "07-api-routes",
+            "title": "API Routes",
+            "order": 7,
+            "file": "07-api-routes.md"
+        },
+        {
+            "id": "08-deployment",
+            "title": "Deployment & Best Practices",
+            "order": 8,
+            "file": "08-deployment.md"
+        }
+    ]
+}

@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { PlusCircle } from "lucide-react"
-import { SeedButton } from "@/components/SeedButton"
 
 export default function Home() {
-  const courses = useLiveQuery(() => db.courses.toArray())
+  const courses = useLiveQuery(() => db.courses.orderBy('order').toArray())
 
   // Use the first course as "continue learning" if available
   const continueLearningCourse = courses?.[0]
@@ -23,7 +22,6 @@ export default function Home() {
           <h1 className="text-3xl font-bold mb-2">My Courses</h1>
           <p className="text-muted-foreground">Manage and learn from your courses</p>
         </div>
-        <SeedButton />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -60,7 +58,7 @@ export default function Home() {
               {courses?.map((course) => (
                 <Link key={course.id} href={`/course/${course.id}`}>
                   <Card className="hover:shadow-lg transition-all cursor-pointer h-full border-none shadow-sm bg-card overflow-hidden group">
-                    <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center">
+                    <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center group-hover:from-slate-200 group-hover:to-slate-300 dark:group-hover:from-slate-700 dark:group-hover:to-slate-800 transition-all">
                       <div className="text-6xl opacity-30">📖</div>
                     </div>
                     <CardHeader className="pb-2">
@@ -79,7 +77,7 @@ export default function Home() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button className="w-full" variant="secondary">View Course</Button>
+                      <Button className="w-full hover:bg-primary/90 transition-colors cursor-pointer" variant="secondary">View Course</Button>
                     </CardFooter>
                   </Card>
                 </Link>
@@ -87,16 +85,8 @@ export default function Home() {
 
               {courses?.length === 0 && (
                 <div className="col-span-full text-center py-12 border-2 border-dashed rounded-lg">
-                  <p className="text-muted-foreground mb-4">No courses yet. Get started by seeding the database or creating a new course.</p>
-                  <div className="flex gap-3 justify-center">
-                    <SeedButton />
-                    <Link href="/create-course">
-                      <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Create Course
-                      </Button>
-                    </Link>
-                  </div>
+                  <p className="text-muted-foreground mb-4">No courses yet. Import courses from the library or create your own.</p>
+                  <p className="text-sm text-muted-foreground">Click the avatar in the header to access the Course Library</p>
                 </div>
               )}
             </div>

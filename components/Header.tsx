@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { SettingsMenu } from "@/components/SettingsMenu"
 import { Moon, Sun, BookOpen } from "lucide-react"
 
 export function Header() {
@@ -35,9 +35,7 @@ export function Header() {
                         <span className="sr-only">Toggle theme</span>
                     </Button>
 
-                    <Avatar className="h-8 w-8">
-                        <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
+                    <SettingsMenu />
                 </nav>
             </div>
         </header>

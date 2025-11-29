@@ -9,24 +9,34 @@ import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Circle } from "luci
 
 interface CourseHeaderProps {
     courseId: string
+    chapterId: string
     title: string
 }
 
-export function CourseHeader({ courseId, title }: CourseHeaderProps) {
+export function CourseHeader({ courseId, chapterId, title }: CourseHeaderProps) {
     const router = useRouter()
-    const courses = useLiveQuery(() => db.courses.toArray())
-    const progress = useLiveQuery(() => db.progress.get(courseId), [courseId])
+    const chapters = useLiveQuery(
+        () => db.chapters.where('courseId').equals(courseId).sortBy('order'),
+        [courseId]
+    )
+    const progress = useLiveQuery(
+        () => db.progress.get(`${courseId}-${chapterId}`),
+        [courseId, chapterId]
+    )
 
-    const currentIndex = courses?.findIndex(c => c.id === courseId) ?? -1
-    const prevCourse = currentIndex > 0 ? courses?.[currentIndex - 1] : null
-    const nextCourse = currentIndex >= 0 && currentIndex < (courses?.length ?? 0) - 1 ? courses?.[currentIndex + 1] : null
+    const currentIndex = chapters?.findIndex(c => c.chapterId === chapterId) ?? -1
+    const prevChapter = currentIndex > 0 ? chapters?.[currentIndex - 1] : null
+    const nextChapter = currentIndex >= 0 && currentIndex < (chapters?.length ?? 0) - 1 ? chapters?.[currentIndex + 1] : null
 
     const toggleCompletion = async () => {
+        const progressId = `${courseId}-${chapterId}`
         if (progress) {
-            await db.progress.update(courseId, { completed: !progress.completed })
+            await db.progress.update(progressId, { completed: !progress.completed })
         } else {
             await db.progress.add({
-                id: courseId,
+                id: progressId,
+                courseId,
+                chapterId,
                 completed: true,
                 lastRead: Date.now()
             })
@@ -37,7 +47,7 @@ export function CourseHeader({ courseId, title }: CourseHeaderProps) {
         <div className="flex items-center justify-between border-b pb-4 mb-6">
             <div className="flex items-center gap-4">
                 <Link href="/">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="hover:bg-accent">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                 </Link>
@@ -51,7 +61,7 @@ export function CourseHeader({ courseId, title }: CourseHeaderProps) {
                     variant="outline"
                     size="sm"
                     onClick={toggleCompletion}
-                    className="gap-2"
+                    className="gap-2 hover:bg-accent transition-colors cursor-pointer"
                 >
                     {progress?.completed ? (
                         <>
@@ -69,16 +79,18 @@ export function CourseHeader({ courseId, title }: CourseHeaderProps) {
                 <Button
                     variant="outline"
                     size="sm"
-                    disabled={!prevCourse}
-                    onClick={() => prevCourse && router.push(`/course/${prevCourse.id}`)}
+                    disabled={!prevChapter}
+                    onClick={() => prevChapter && router.push(`/course/${courseId}?chapter=${prevChapter.chapterId}`)}
+                    className="hover:bg-accent transition-colors cursor-pointer disabled:cursor-not-allowed"
                 >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Prev
                 </Button>
                 <Button
                     size="sm"
-                    disabled={!nextCourse}
-                    onClick={() => nextCourse && router.push(`/course/${nextCourse.id}`)}
+                    disabled={!nextChapter}
+                    onClick={() => nextChapter && router.push(`/course/${courseId}?chapter=${nextChapter.chapterId}`)}
+                    className="hover:bg-primary/90 transition-colors cursor-pointer disabled:cursor-not-allowed"
                 >
                     Next
                     <ChevronRight className="h-4 w-4 ml-1" />
