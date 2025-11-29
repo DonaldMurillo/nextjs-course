@@ -63,22 +63,55 @@ export function SettingsMenu() {
                 createdAt: Date.now(),
                 order: course.order,
                 author: course.author,
+                version: course.version,
+                nextjsVersion: course.nextjsVersion,
                 tags: course.tags,
                 difficulty: course.difficulty,
-                estimatedHours: course.estimatedHours
+                estimatedHours: course.estimatedHours,
+                prerequisites: course.prerequisites
             })
 
-            // Add all chapters
+            // Add all parts
+            if (course.parts) {
+                for (const part of course.parts) {
+                    await db.parts.add({
+                        id: `${course.id}-${part.id}`,
+                        courseId: course.id,
+                        partId: part.id,
+                        title: part.title,
+                        order: part.order
+                    })
+                }
+            }
+
+            // Add all chapters and their subchapters
             for (const chapter of course.chaptersContent) {
                 await db.chapters.add({
                     id: `${course.id}-${chapter.id}`,
                     courseId: course.id,
                     chapterId: chapter.id,
+                    partId: chapter.partId,
                     title: chapter.title,
                     content: chapter.content,
                     order: chapter.order,
                     createdAt: Date.now()
                 })
+
+                // Add subchapters
+                if (chapter.subchapters) {
+                    for (const subchapter of chapter.subchapters) {
+                        await db.subchapters.add({
+                            id: `${course.id}-${chapter.id}-${subchapter.id}`,
+                            courseId: course.id,
+                            chapterId: chapter.id,
+                            subchapterId: subchapter.id,
+                            title: subchapter.title,
+                            content: subchapter.content,
+                            order: subchapter.order,
+                            createdAt: Date.now()
+                        })
+                    }
+                }
             }
         } catch (error) {
             console.error('Failed to import course:', error)
@@ -101,8 +134,10 @@ export function SettingsMenu() {
 
     const deleteCourse = async (courseId: string) => {
         await db.courses.delete(courseId)
+        await db.parts.where('courseId').equals(courseId).delete()
         await db.chapters.where('courseId').equals(courseId).delete()
-        await db.progress.delete(courseId)
+        await db.subchapters.where('courseId').equals(courseId).delete()
+        await db.progress.where('courseId').equals(courseId).delete()
         await db.notes.where('courseId').equals(courseId).delete()
         setDeleteConfirm(null)
     }

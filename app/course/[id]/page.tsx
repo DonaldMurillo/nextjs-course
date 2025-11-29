@@ -8,8 +8,8 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer"
 import { Skeleton } from "@/components/ui/skeleton"
 import { NoteTaker } from "@/components/NoteTaker"
 import { CourseHeader } from "@/components/CourseHeader"
-import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle2, Circle } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { CheckCircle2, Circle, ChevronRight, ChevronDown } from "lucide-react"
 import Link from "next/link"
 
 export default function CoursePage() {
@@ -17,22 +17,68 @@ export default function CoursePage() {
     const searchParams = useSearchParams()
     const courseId = params.id as string
     const chapterId = searchParams.get('chapter')
+    const subchapterId = searchParams.get('subchapter')
 
     const [isNotesPanelCollapsed, setIsNotesPanelCollapsed] = useState(false)
+    const [openParts, setOpenParts] = useState<Set<string>>(new Set())
 
     const course = useLiveQuery(() => db.courses.get(courseId), [courseId])
+    const parts = useLiveQuery(
+        () => db.parts.where('courseId').equals(courseId).sortBy('order'),
+        [courseId]
+    )
     const chapters = useLiveQuery(
         () => db.chapters.where('courseId').equals(courseId).sortBy('order'),
+        [courseId]
+    )
+    const subchapters = useLiveQuery(
+        () => db.subchapters.where('courseId').equals(courseId).sortBy('order'),
         [courseId]
     )
     const progress = useLiveQuery(() => db.progress.toArray(), [])
 
     // Get current chapter or first chapter
     const currentChapter = chapters?.find(c => c.chapterId === chapterId) || chapters?.[0]
+    // Get current subchapter if specified
+    const currentSubchapter = subchapterId
+        ? subchapters?.find(s => s.subchapterId === subchapterId && s.chapterId === currentChapter?.chapterId)
+        : null
+
+    // Auto-expand the part containing the current chapter
+    const currentPartId = currentChapter?.partId
+    if (currentPartId && !openParts.has(currentPartId) && parts?.length) {
+        setOpenParts(new Set([...openParts, currentPartId]))
+    }
+
+    const togglePart = (partId: string) => {
+        const newOpenParts = new Set(openParts)
+        if (newOpenParts.has(partId)) {
+            newOpenParts.delete(partId)
+        } else {
+            newOpenParts.add(partId)
+        }
+        setOpenParts(newOpenParts)
+    }
 
     const isChapterComplete = (chapId: string) => {
-        return progress?.some(p => p.chapterId === chapId && p.completed) ?? false
+        return progress?.some(p => p.chapterId === chapId && !p.subchapterId && p.completed) ?? false
     }
+
+    const isSubchapterComplete = (chapId: string, subchapId: string) => {
+        return progress?.some(p => p.chapterId === chapId && p.subchapterId === subchapId && p.completed) ?? false
+    }
+
+    const getChaptersForPart = (partId: string) => {
+        return chapters?.filter(c => c.partId === partId) || []
+    }
+
+    const getSubchaptersForChapter = (chapId: string) => {
+        return subchapters?.filter(s => s.chapterId === chapId) || []
+    }
+
+    // Determine what content to display
+    const displayContent = currentSubchapter?.content || currentChapter?.content || ''
+    const displayTitle = currentSubchapter?.title || currentChapter?.title || ''
 
     if (!course || !chapters || !currentChapter) {
         return (
@@ -52,44 +98,140 @@ export default function CoursePage() {
             <CourseHeader
                 courseId={courseId}
                 chapterId={currentChapter.chapterId}
+                subchapterId={currentSubchapter?.subchapterId}
                 title={course.title}
             />
 
             <div className="flex flex-col lg:flex-row gap-8 flex-1 overflow-hidden">
                 {/* Chapter Sidebar */}
-                <div className="w-full lg:w-64 flex-shrink-0 overflow-y-auto">
-                    <h3 className="font-semibold mb-4">Chapters</h3>
-                    <div className="space-y-2">
-                        {chapters.map((chapter) => (
-                            <Link
-                                key={chapter.id}
-                                href={`/course/${courseId}?chapter=${chapter.chapterId}`}
-                                className="block"
-                            >
-                                <Card className={`cursor-pointer transition-all hover:shadow-md ${currentChapter.id === chapter.id ? 'border-primary bg-primary/5' : ''
-                                    }`}>
-                                    <CardContent className="p-3 flex items-start gap-2">
-                                        {isChapterComplete(chapter.chapterId) ? (
-                                            <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="w-full lg:w-72 flex-shrink-0 overflow-y-auto">
+                    <h3 className="font-semibold mb-4">Contents</h3>
+                    <div className="space-y-1">
+                        {parts && parts.length > 0 ? (
+                            // Render with parts structure
+                            parts.map((part) => (
+                                <Collapsible
+                                    key={part.id}
+                                    open={openParts.has(part.partId)}
+                                    onOpenChange={() => togglePart(part.partId)}
+                                >
+                                    <CollapsibleTrigger className="flex items-center gap-2 w-full p-2 text-left hover:bg-muted rounded-md transition-colors">
+                                        {openParts.has(part.partId) ? (
+                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                         ) : (
-                                            <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                         )}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium line-clamp-2">{chapter.title}</p>
-                                            <p className="text-xs text-muted-foreground">Chapter {chapter.order}</p>
+                                        <span className="font-medium text-sm">{part.title}</span>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent className="pl-4">
+                                        <div className="space-y-1 border-l border-border ml-2 pl-2">
+                                            {getChaptersForPart(part.partId).map((chapter) => {
+                                                const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
+                                                const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+
+                                                return (
+                                                    <div key={chapter.id}>
+                                                        <Link
+                                                            href={`/course/${courseId}?chapter=${chapter.chapterId}`}
+                                                            className={`flex items-start gap-2 p-2 rounded-md transition-colors hover:bg-muted ${isCurrentChapter ? 'bg-primary/10 text-primary' : ''
+                                                                }`}
+                                                        >
+                                                            {isChapterComplete(chapter.chapterId) ? (
+                                                                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                                            ) : (
+                                                                <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                                            )}
+                                                            <span className="text-sm line-clamp-2">{chapter.title}</span>
+                                                        </Link>
+
+                                                        {/* Subchapters */}
+                                                        {chapterSubchapters.length > 0 && (
+                                                            <div className="ml-6 space-y-1 border-l border-border/50 pl-2">
+                                                                {chapterSubchapters.map((subchapter) => {
+                                                                    const isCurrentSubchapter = currentSubchapter?.id === subchapter.id
+
+                                                                    return (
+                                                                        <Link
+                                                                            key={subchapter.id}
+                                                                            href={`/course/${courseId}?chapter=${chapter.chapterId}&subchapter=${subchapter.subchapterId}`}
+                                                                            className={`flex items-start gap-2 p-1.5 rounded-md transition-colors hover:bg-muted ${isCurrentSubchapter ? 'bg-primary/10 text-primary' : ''
+                                                                                }`}
+                                                                        >
+                                                                            {isSubchapterComplete(chapter.chapterId, subchapter.subchapterId) ? (
+                                                                                <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                                                            ) : (
+                                                                                <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                                                            )}
+                                                                            <span className="text-xs line-clamp-2">{subchapter.title}</span>
+                                                                        </Link>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })}
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
+                                    </CollapsibleContent>
+                                </Collapsible>
+                            ))
+                        ) : (
+                            // Fallback: render chapters without parts
+                            chapters.map((chapter) => {
+                                const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
+                                const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+
+                                return (
+                                    <div key={chapter.id}>
+                                        <Link
+                                            href={`/course/${courseId}?chapter=${chapter.chapterId}`}
+                                            className={`flex items-start gap-2 p-2 rounded-md transition-colors hover:bg-muted ${isCurrentChapter ? 'bg-primary/10 text-primary' : ''
+                                                }`}
+                                        >
+                                            {isChapterComplete(chapter.chapterId) ? (
+                                                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                            ) : (
+                                                <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                            )}
+                                            <span className="text-sm line-clamp-2">{chapter.title}</span>
+                                        </Link>
+
+                                        {/* Subchapters */}
+                                        {chapterSubchapters.length > 0 && (
+                                            <div className="ml-6 space-y-1 border-l border-border/50 pl-2">
+                                                {chapterSubchapters.map((subchapter) => {
+                                                    const isCurrentSubchapter = currentSubchapter?.id === subchapter.id
+
+                                                    return (
+                                                        <Link
+                                                            key={subchapter.id}
+                                                            href={`/course/${courseId}?chapter=${chapter.chapterId}&subchapter=${subchapter.subchapterId}`}
+                                                            className={`flex items-start gap-2 p-1.5 rounded-md transition-colors hover:bg-muted ${isCurrentSubchapter ? 'bg-primary/10 text-primary' : ''
+                                                                }`}
+                                                        >
+                                                            {isSubchapterComplete(chapter.chapterId, subchapter.subchapterId) ? (
+                                                                <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0 mt-0.5" />
+                                                            ) : (
+                                                                <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                                            )}
+                                                            <span className="text-xs line-clamp-2">{subchapter.title}</span>
+                                                        </Link>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })
+                        )}
                     </div>
                 </div>
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto pr-4">
                     <article className="max-w-3xl mx-auto pb-20">
-                        <h2 className="text-2xl font-bold mb-4">{currentChapter.title}</h2>
-                        <MarkdownRenderer content={currentChapter.content} />
+                        <h2 className="text-2xl font-bold mb-4">{displayTitle}</h2>
+                        <MarkdownRenderer content={displayContent} />
                     </article>
                 </div>
 
@@ -99,6 +241,7 @@ export default function CoursePage() {
                     <NoteTaker
                         courseId={courseId}
                         chapterId={currentChapter.chapterId}
+                        subchapterId={currentSubchapter?.subchapterId}
                         onCollapseChange={setIsNotesPanelCollapsed}
                     />
                 </div>

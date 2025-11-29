@@ -12,19 +12,24 @@ import { Plus, Trash2, Save, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, 
 interface NoteTakerProps {
     courseId: string
     chapterId?: string
+    subchapterId?: string
     onCollapseChange?: (collapsed: boolean) => void
 }
 
-export function NoteTaker({ courseId, chapterId, onCollapseChange }: NoteTakerProps) {
+export function NoteTaker({ courseId, chapterId, subchapterId, onCollapseChange }: NoteTakerProps) {
     const notes = useLiveQuery(
         () => {
             let query = db.notes.where('courseId').equals(courseId)
             if (chapterId) {
-                return query.and(note => note.chapterId === chapterId).reverse().sortBy('createdAt')
+                query = query.and(note => note.chapterId === chapterId)
+                if (subchapterId) {
+                    return query.and(note => note.subchapterId === subchapterId).reverse().sortBy('createdAt')
+                }
+                return query.and(note => !note.subchapterId).reverse().sortBy('createdAt')
             }
             return query.reverse().sortBy('createdAt')
         },
-        [courseId, chapterId]
+        [courseId, chapterId, subchapterId]
     )
 
     const [isAdding, setIsAdding] = useState(false)
@@ -47,6 +52,7 @@ export function NoteTaker({ courseId, chapterId, onCollapseChange }: NoteTakerPr
             id: crypto.randomUUID(),
             courseId,
             chapterId,
+            subchapterId,
             title: newTitle,
             content: newContent,
             createdAt: Date.now(),

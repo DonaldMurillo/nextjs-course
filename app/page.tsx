@@ -6,13 +6,84 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { PlusCircle } from "lucide-react"
 
 export default function Home() {
   const courses = useLiveQuery(() => db.courses.orderBy('order').toArray())
+  const chapters = useLiveQuery(() => db.chapters.toArray())
+  const subchapters = useLiveQuery(() => db.subchapters.toArray())
+  const progress = useLiveQuery(() => db.progress.toArray())
 
-  // Use the first course as "continue learning" if available
-  const continueLearningCourse = courses?.[0]
+  // Calculate progress for a specific course
+  const getCourseProgress = (courseId: string) => {
+    const courseChapters = chapters?.filter(c => c.courseId === courseId) || []
+    const courseSubchapters = subchapters?.filter(s => s.courseId === courseId) || []
+
+    // Total items = chapters + subchapters
+    const totalItems = courseChapters.length + courseSubchapters.length
+    if (totalItems === 0) return 0
+
+    // Count completed items
+    const completedChapters = progress?.filter(p =>
+      p.courseId === courseId && !p.subchapterId && p.completed
+    ).length || 0
+
+    const completedSubchapters = progress?.filter(p =>
+      p.courseId === courseId && p.subchapterId && p.completed
+    ).length || 0
+
+    const completedItems = completedChapters + completedSubchapters
+    return Math.round((completedItems / totalItems) * 100)
+  }
+
+  // Calculate overall stats
+  const getOverallStats = () => {
+    if (!courses) return { completed: 0, inProgress: 0, total: 0 }
+
+    let completed = 0
+    let inProgress = 0
+
+    for (const course of courses) {
+      const progressPercent = getCourseProgress(course.id)
+      if (progressPercent === 100) {
+        completed++
+      } else if (progressPercent > 0) {
+        inProgress++
+      }
+    }
+
+    return { completed, inProgress, total: courses.length }
+  }
+
+  const stats = getOverallStats()
+
+  // Find the course to continue (most recently accessed or first with progress < 100%)
+  const getContinueLearningCourse = () => {
+    if (!courses || courses.length === 0) return null
+
+    // Find the course with most recent progress that isn't complete
+    const courseProgress = courses.map(course => ({
+      course,
+      progress: getCourseProgress(course.id),
+      lastRead: progress?.filter(p => p.courseId === course.id)
+        .reduce((max, p) => Math.max(max, p.lastRead || 0), 0) || 0
+    }))
+
+    // Prefer courses in progress, sorted by last read
+    const inProgressCourses = courseProgress
+      .filter(cp => cp.progress > 0 && cp.progress < 100)
+      .sort((a, b) => b.lastRead - a.lastRead)
+
+    if (inProgressCourses.length > 0) {
+      return inProgressCourses[0].course
+    }
+
+    // Fall back to first incomplete course
+    const incompleteCourse = courseProgress.find(cp => cp.progress < 100)
+    return incompleteCourse?.course || courses[0]
+  }
+
+  const continueLearningCourse = getContinueLearningCourse()
+  const continueProgress = continueLearningCourse ? getCourseProgress(continueLearningCourse.id) : 0
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -40,11 +111,11 @@ export default function Home() {
                   <h2 className="text-2xl font-bold mb-2">{continueLearningCourse.title}</h2>
                   <p className="text-sm text-muted-foreground mb-4">{continueLearningCourse.description}</p>
                   <div className="flex items-center gap-4 mb-6">
-                    <Progress value={0} className="h-2" />
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">0% complete</span>
+                    <Progress value={continueProgress} className="h-2" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{continueProgress}% complete</span>
                   </div>
                   <Link href={`/course/${continueLearningCourse.id}`}>
-                    <Button>Continue Lesson</Button>
+                    <Button>{continueProgress > 0 ? 'Continue Lesson' : 'Start Learning'}</Button>
                   </Link>
                 </div>
               </div>
@@ -55,33 +126,38 @@ export default function Home() {
           <div>
             <h2 className="text-xl font-bold mb-4">All My Courses</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courses?.map((course) => (
-                <Link key={course.id} href={`/course/${course.id}`}>
-                  <Card className="hover:shadow-lg transition-all cursor-pointer h-full border-none shadow-sm bg-card overflow-hidden group">
-                    <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center group-hover:from-slate-200 group-hover:to-slate-300 dark:group-hover:from-slate-700 dark:group-hover:to-slate-800 transition-all">
-                      <div className="text-6xl opacity-30">📖</div>
-                    </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="line-clamp-1">{course.title}</CardTitle>
-                      <CardDescription className="line-clamp-2">
-                        {course.description || "No description provided."}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Progress</span>
-                          <span>0%</span>
-                        </div>
-                        <Progress value={0} className="h-1.5" />
+              {courses?.map((course) => {
+                const courseProgress = getCourseProgress(course.id)
+                return (
+                  <Link key={course.id} href={`/course/${course.id}`}>
+                    <Card className="hover:shadow-lg transition-all cursor-pointer h-full border-none shadow-sm bg-card overflow-hidden group">
+                      <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center group-hover:from-slate-200 group-hover:to-slate-300 dark:group-hover:from-slate-700 dark:group-hover:to-slate-800 transition-all">
+                        <div className="text-6xl opacity-30">📖</div>
                       </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full hover:bg-primary/90 transition-colors cursor-pointer" variant="secondary">View Course</Button>
-                    </CardFooter>
-                  </Card>
-                </Link>
-              ))}
+                      <CardHeader className="pb-2">
+                        <CardTitle className="line-clamp-1">{course.title}</CardTitle>
+                        <CardDescription className="line-clamp-2">
+                          {course.description || "No description provided."}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Progress</span>
+                            <span>{courseProgress}%</span>
+                          </div>
+                          <Progress value={courseProgress} className="h-1.5" />
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full hover:bg-primary/90 transition-colors cursor-pointer" variant="secondary">
+                          {courseProgress === 100 ? 'Review Course' : courseProgress > 0 ? 'Continue' : 'Start Course'}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </Link>
+                )
+              })}
 
               {courses?.length === 0 && (
                 <div className="col-span-full text-center py-12 border-2 border-dashed rounded-lg">
@@ -103,15 +179,15 @@ export default function Home() {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Courses Completed</span>
-                <span className="text-xl font-bold">0</span>
+                <span className="text-xl font-bold">{stats.completed}</span>
               </div>
               <div className="flex justify-between items-center border-t pt-4">
                 <span className="text-sm text-muted-foreground">Courses in Progress</span>
-                <span className="text-xl font-bold">{courses?.length || 0}</span>
+                <span className="text-xl font-bold">{stats.inProgress}</span>
               </div>
               <div className="flex justify-between items-center border-t pt-4">
                 <span className="text-sm text-muted-foreground">Total Courses</span>
-                <span className="text-xl font-bold">{courses?.length || 0}</span>
+                <span className="text-xl font-bold">{stats.total}</span>
               </div>
             </CardContent>
           </Card>
