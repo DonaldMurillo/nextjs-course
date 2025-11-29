@@ -4,10 +4,9 @@ import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
 import { useParams } from "next/navigation"
 import { MarkdownRenderer } from "@/components/MarkdownRenderer"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
+import { NoteTaker } from "@/components/NoteTaker"
+import { CourseHeader } from "@/components/CourseHeader"
 
 export default function CoursePage() {
     const params = useParams()
@@ -29,26 +28,27 @@ export default function CoursePage() {
     }
 
     return (
-        <div className="container mx-auto py-10 px-4 max-w-4xl">
-            <div className="mb-6">
-                <Link href="/">
-                    <Button variant="ghost" className="pl-0">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Courses
-                    </Button>
-                </Link>
+        <div className="container mx-auto py-6 px-4 max-w-[1600px] h-[calc(100vh-4rem)] flex flex-col">
+            <CourseHeader courseId={id} title={course.title} />
+
+            <div className="flex flex-col lg:flex-row gap-8 flex-1 overflow-hidden">
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto pr-4">
+                    <article className="max-w-3xl mx-auto pb-20">
+                        {course.description && (
+                            <p className="text-xl text-muted-foreground mb-8 border-b pb-8">
+                                {course.description}
+                            </p>
+                        )}
+                        <MarkdownRenderer content={course.content} />
+                    </article>
+                </div>
+
+                {/* Notes Sidebar */}
+                <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l pt-6 lg:pt-0 lg:pl-6 flex flex-col h-full bg-background">
+                    <NoteTaker courseId={id} />
+                </div>
             </div>
-
-            <article>
-                <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-                {course.description && (
-                    <p className="text-xl text-muted-foreground mb-8 border-b pb-8">
-                        {course.description}
-                    </p>
-                )}
-
-                <MarkdownRenderer content={course.content} />
-            </article>
         </div>
     )
 }
