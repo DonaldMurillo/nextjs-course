@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
 import { useParams, useSearchParams } from "next/navigation"
@@ -16,6 +17,8 @@ export default function CoursePage() {
     const searchParams = useSearchParams()
     const courseId = params.id as string
     const chapterId = searchParams.get('chapter')
+
+    const [isNotesPanelCollapsed, setIsNotesPanelCollapsed] = useState(false)
 
     const course = useLiveQuery(() => db.courses.get(courseId), [courseId])
     const chapters = useLiveQuery(
@@ -91,8 +94,13 @@ export default function CoursePage() {
                 </div>
 
                 {/* Notes Sidebar */}
-                <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l pt-6 lg:pt-0 lg:pl-6 flex flex-col h-full bg-background">
-                    <NoteTaker courseId={courseId} chapterId={currentChapter.chapterId} />
+                <div className={`border-t lg:border-t-0 lg:border-l pt-6 lg:pt-0 lg:pl-6 flex flex-col h-full bg-background transition-all duration-300 ${isNotesPanelCollapsed ? 'w-auto lg:w-20' : 'w-full lg:w-[400px]'
+                    }`}>
+                    <NoteTaker
+                        courseId={courseId}
+                        chapterId={currentChapter.chapterId}
+                        onCollapseChange={setIsNotesPanelCollapsed}
+                    />
                 </div>
             </div>
         </div>
