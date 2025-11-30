@@ -322,12 +322,12 @@ export default function CoursePage() {
                                 <div className="flex items-center justify-between gap-4">
                                     {prevItem ? (
                                         <Link href={getNavUrl(prevItem)} className="flex-1 max-w-[45%]">
-                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-start gap-1">
+                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-start gap-1 whitespace-normal">
                                                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                     <ChevronLeft className="h-3 w-3" />
                                                     Previous
                                                 </span>
-                                                <span className="text-sm font-medium text-left line-clamp-1">
+                                                <span className="text-sm font-medium text-left">
                                                     {prevItem.number}. {prevItem.title}
                                                 </span>
                                             </Button>
@@ -338,12 +338,12 @@ export default function CoursePage() {
 
                                     {nextItem ? (
                                         <Link href={getNavUrl(nextItem)} className="flex-1 max-w-[45%]">
-                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-end gap-1">
+                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-end gap-1 whitespace-normal">
                                                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                     Next
                                                     <ChevronRight className="h-3 w-3" />
                                                 </span>
-                                                <span className="text-sm font-medium text-right line-clamp-1">
+                                                <span className="text-sm font-medium text-right">
                                                     {nextItem.number}. {nextItem.title}
                                                 </span>
                                             </Button>
