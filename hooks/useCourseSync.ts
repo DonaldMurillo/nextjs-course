@@ -4,6 +4,19 @@ import { useEffect, useState, useCallback } from "react"
 import { db } from "@/lib/db"
 import type { AvailableCourse } from "@/lib/courseLibrary"
 
+// Get the base path for static assets (set in next.config.ts)
+const getBasePath = () => {
+  if (typeof window !== "undefined") {
+    // Check if we're on GitHub Pages by looking at the pathname
+    const pathname = window.location.pathname
+    // If the pathname starts with /nextjs-course/, we're on GitHub Pages
+    if (pathname.startsWith("/nextjs-course")) {
+      return "/nextjs-course"
+    }
+  }
+  return ""
+}
+
 interface SyncStatus {
   syncing: boolean
   lastSynced: number | null
@@ -86,8 +99,9 @@ export function useCourseSync() {
     setStatus((prev) => ({ ...prev, syncing: true, error: null }))
 
     try {
-      // Fetch available courses from the API
-      const response = await fetch("/api/courses/available")
+      // Fetch available courses from the static JSON file
+      const basePath = getBasePath()
+      const response = await fetch(`${basePath}/data/courses.json`)
       if (!response.ok) {
         throw new Error("Failed to fetch available courses")
       }

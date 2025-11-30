@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# generated static data
+/public/data/
+
 # production
 /build
 
