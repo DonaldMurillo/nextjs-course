@@ -1,0 +1,93 @@
+{
+    "id": "typescript-for-nextjs",
+    "title": "TypeScript for Next.js",
+    "description": "A practical TypeScript course focused on what you need for Next.js development. Learn type safety, React typing patterns, and how TypeScript prevents bugs before they happen.",
+    "author": "CourseApp",
+    "version": "1.0.0",
+    "typescriptVersion": "5+",
+    "order": 1,
+    "tags": [
+        "typescript",
+        "nextjs",
+        "react",
+        "type-safety",
+        "javascript"
+    ],
+    "difficulty": "beginner-to-intermediate",
+    "estimatedHours": 4,
+    "prerequisites": [
+        "JavaScript fundamentals",
+        "Basic React knowledge helpful",
+        "Familiarity with Next.js concepts helpful"
+    ],
+    "parts": [
+        {
+            "id": "part-1",
+            "title": "TypeScript Fundamentals",
+            "order": 1
+        },
+        {
+            "id": "part-2",
+            "title": "TypeScript in Practice",
+            "order": 2
+        }
+    ],
+    "chapters": [
+        {
+            "id": "01-why-typescript",
+            "title": "Why TypeScript? The Guardrails",
+            "part": "part-1",
+            "order": 1,
+            "file": "01-why-typescript.md",
+            "subchapters": []
+        },
+        {
+            "id": "02-basic-types",
+            "title": "Basic Types & Type Annotations",
+            "part": "part-1",
+            "order": 2,
+            "file": "02-basic-types.md",
+            "subchapters": []
+        },
+        {
+            "id": "03-objects-interfaces",
+            "title": "Objects, Interfaces & Type Aliases",
+            "part": "part-1",
+            "order": 3,
+            "file": "03-objects-interfaces.md",
+            "subchapters": []
+        },
+        {
+            "id": "04-functions",
+            "title": "Functions & Generics",
+            "part": "part-1",
+            "order": 4,
+            "file": "04-functions-generics.md",
+            "subchapters": []
+        },
+        {
+            "id": "05-react-typescript",
+            "title": "React with TypeScript",
+            "part": "part-2",
+            "order": 5,
+            "file": "05-react-typescript.md",
+            "subchapters": []
+        },
+        {
+            "id": "06-nextjs-typescript",
+            "title": "Next.js with TypeScript",
+            "part": "part-2",
+            "order": 6,
+            "file": "06-nextjs-typescript.md",
+            "subchapters": []
+        },
+        {
+            "id": "07-quick-reference",
+            "title": "Quick Reference / Cheat Sheet",
+            "part": "part-2",
+            "order": 7,
+            "file": "07-quick-reference.md",
+            "subchapters": []
+        }
+    ]
+}
