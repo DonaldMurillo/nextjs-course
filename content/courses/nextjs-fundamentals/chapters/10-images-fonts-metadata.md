@@ -117,9 +117,11 @@ import heroImage from '../public/hero.jpg';
 
 Configure allowed remote domains:
 
-```js
-// next.config.js
-module.exports = {
+```ts
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -132,7 +134,9 @@ module.exports = {
       },
     ],
   },
-}
+};
+
+export default config;
 ```
 
 ## Font Optimization
@@ -141,8 +145,8 @@ Next.js provides automatic font optimization with `next/font`:
 
 ### Google Fonts
 
-```jsx
-// app/layout.js
+```tsx
+// app/layout.tsx
 import { Inter, Roboto_Mono } from 'next/font/google';
 
 const inter = Inter({
@@ -157,7 +161,11 @@ const robotoMono = Roboto_Mono({
   variable: '--font-roboto-mono',
 });
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
       <body className={inter.className}>{children}</body>
@@ -190,9 +198,12 @@ const myFont = localFont({
 
 ### Using with Tailwind
 
-```js
-// tailwind.config.js
-module.exports = {
+```ts
+// tailwind.config.ts
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+  content: ['./app/**/*.{js,ts,jsx,tsx,mdx}', './components/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -201,7 +212,10 @@ module.exports = {
       },
     },
   },
-}
+  plugins: [],
+};
+
+export default config;
 ```
 
 ```jsx
@@ -213,9 +227,11 @@ module.exports = {
 
 ### Static Metadata
 
-```jsx
-// app/layout.js or app/page.js
-export const metadata = {
+```tsx
+// app/layout.tsx or app/page.tsx
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
   title: 'My Website',
   description: 'Welcome to my website',
   keywords: ['Next.js', 'React', 'TypeScript'],
@@ -250,12 +266,18 @@ export const metadata = {
 
 ### Dynamic Metadata
 
-```jsx
-// app/blog/[slug]/page.js
-export async function generateMetadata({ params }) {
+```tsx
+// app/blog/[slug]/page.tsx
+import type { Metadata } from 'next';
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
-  
+
   return {
     title: post.title,
     description: post.excerpt,
@@ -273,26 +295,32 @@ export async function generateMetadata({ params }) {
 
 ### Template Titles
 
-```jsx
-// app/layout.js
-export const metadata = {
+```tsx
+// app/layout.tsx
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
   title: {
     template: '%s | My Website',
     default: 'My Website',
   },
 };
 
-// app/about/page.js
-export const metadata = {
-  title: 'About',  // Renders: "About | My Website"
+// app/about/page.tsx
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About', // Renders: "About | My Website"
 };
 ```
 
 ### Favicon and Icons
 
-```jsx
-// app/layout.js
-export const metadata = {
+```tsx
+// app/layout.tsx
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
@@ -315,25 +343,30 @@ app/
 
 ### Basic Example: Blog Post with Image
 
-```jsx
-// app/blog/[slug]/page.js
+```tsx
+// app/blog/[slug]/page.tsx
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import { getPost } from '@/lib/posts';
 
-export async function generateMetadata({ params }) {
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
-  
+
   return {
     title: post.title,
     description: post.excerpt,
   };
 }
 
-export default async function BlogPost({ params }) {
+export default async function BlogPost({ params }: PageProps) {
   const { slug } = await params;
   const post = await getPost(slug);
-  
+
   return (
     <article>
       <div className="relative h-96">
@@ -354,11 +387,22 @@ export default async function BlogPost({ params }) {
 
 ### Normal Example: Image Gallery
 
-```jsx
-// components/Gallery.js
+```tsx
+// components/Gallery.tsx
 import Image from 'next/image';
 
-export function Gallery({ images }) {
+interface GalleryImage {
+  id: string;
+  url: string;
+  alt: string;
+  blurDataURL: string;
+}
+
+interface GalleryProps {
+  images: GalleryImage[];
+}
+
+export function Gallery({ images }: GalleryProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {images.map((image, index) => (
@@ -371,7 +415,7 @@ export function Gallery({ images }) {
             className="object-cover rounded-lg"
             placeholder="blur"
             blurDataURL={image.blurDataURL}
-            priority={index < 6}  // Priority for first 6 images
+            priority={index < 6} // Priority for first 6 images
           />
         </div>
       ))}
@@ -382,37 +426,41 @@ export function Gallery({ images }) {
 
 ### Complex Example: E-commerce Product Page
 
-```jsx
-// app/products/[id]/page.js
+```tsx
+// app/products/[id]/page.tsx
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import { getProduct } from '@/lib/products';
 
-export async function generateMetadata({ params }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const product = await getProduct(id);
-  
+
   return {
     title: product.name,
     description: product.description,
     openGraph: {
       title: product.name,
       description: product.description,
-      images: product.images.map(img => ({
+      images: product.images.map((img) => ({
         url: img.url,
         width: 800,
         height: 800,
         alt: product.name,
       })),
-      type: 'product',
     },
     other: {
-      'product:price:amount': product.price,
+      'product:price:amount': String(product.price),
       'product:price:currency': 'USD',
     },
   };
 }
 
-export default async function ProductPage({ params }) {
+export default async function ProductPage({ params }: PageProps) {
   const { id } = await params;
   const product = await getProduct(id);
   
@@ -458,11 +506,16 @@ export default async function ProductPage({ params }) {
 
 ## JSON-LD Structured Data
 
-```jsx
-// app/products/[id]/page.js
-export default async function ProductPage({ params }) {
-  const product = await getProduct(params.id);
-  
+```tsx
+// app/products/[id]/page.tsx
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ProductPage({ params }: PageProps) {
+  const { id } = await params;
+  const product = await getProduct(id);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',

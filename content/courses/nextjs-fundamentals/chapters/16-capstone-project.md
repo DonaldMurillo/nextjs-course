@@ -20,7 +20,7 @@ In this capstone project, you'll build a complete developer portfolio website us
 
 ```bash
 npx create-next-app@latest portfolio
-# ✔ TypeScript: No
+# ✔ TypeScript: Yes
 # ✔ ESLint: Yes
 # ✔ Tailwind CSS: Yes
 # ✔ src/ directory: No
@@ -50,27 +50,27 @@ npx prisma init --datasource-provider sqlite
 ```
 portfolio/
 ├── app/
-│   ├── layout.js
-│   ├── page.js
+│   ├── layout.tsx
+│   ├── page.tsx
 │   ├── globals.css
 │   ├── projects/
-│   │   ├── page.js
+│   │   ├── page.tsx
 │   │   └── [slug]/
-│   │       └── page.js
+│   │       └── page.tsx
 │   ├── blog/
-│   │   ├── page.js
+│   │   ├── page.tsx
 │   │   └── [slug]/
-│   │       └── page.js
+│   │       └── page.tsx
 │   ├── contact/
-│   │   └── page.js
-│   └── actions.js
+│   │   └── page.tsx
+│   └── actions.ts
 ├── components/
-│   ├── Header.js
-│   ├── Footer.js
-│   ├── ProjectCard.js
-│   ├── BlogCard.js
-│   ├── ContactForm.js
-│   └── ThemeToggle.js
+│   ├── Header.tsx
+│   ├── Footer.tsx
+│   ├── ProjectCard.tsx
+│   ├── BlogCard.tsx
+│   ├── ContactForm.tsx
+│   └── ThemeToggle.tsx
 ├── content/
 │   ├── projects/
 │   │   ├── project-1.mdx
@@ -79,9 +79,11 @@ portfolio/
 │       ├── post-1.mdx
 │       └── post-2.mdx
 ├── lib/
-│   ├── prisma.js
-│   ├── content.js
-│   └── utils.js
+│   ├── prisma.ts
+│   ├── content.ts
+│   └── utils.ts
+├── types/
+│   └── index.ts
 └── prisma/
     └── schema.prisma
 ```
@@ -116,16 +118,17 @@ npx prisma migrate dev --name init
 
 ### Root Layout
 
-```jsx
-// app/layout.js
+```tsx
+// app/layout.tsx
 import { Inter } from 'next/font/google';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     template: '%s | Your Name',
     default: 'Your Name - Developer',
@@ -133,7 +136,11 @@ export const metadata = {
   description: 'Full-stack developer specializing in React and Next.js',
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
@@ -189,8 +196,8 @@ export default function RootLayout({ children }) {
 
 ### Homepage
 
-```jsx
-// app/page.js
+```tsx
+// app/page.tsx
 import Link from 'next/link';
 import { getProjects } from '@/lib/content';
 import { ProjectCard } from '@/components/ProjectCard';
@@ -204,10 +211,10 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="container py-20">
         <h1 className="text-5xl font-bold mb-6">
-          Hi, I'm <span className="text-blue-500">Your Name</span>
+          Hi, I&apos;m <span className="text-blue-500">Your Name</span>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">
-          A full-stack developer passionate about building beautiful, 
+          A full-stack developer passionate about building beautiful,
           functional web applications with React and Next.js.
         </p>
         <div className="flex gap-4">
@@ -235,10 +242,7 @@ export default async function HomePage() {
           ))}
         </div>
         <div className="mt-8 text-center">
-          <Link
-            href="/projects"
-            className="text-blue-500 hover:underline"
-          >
+          <Link href="/projects" className="text-blue-500 hover:underline">
             View all projects →
           </Link>
         </div>
@@ -250,8 +254,8 @@ export default async function HomePage() {
 
 ### Content Library
 
-```jsx
-// lib/content.js
+```tsx
+// lib/content.ts
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -259,79 +263,104 @@ import matter from 'gray-matter';
 const projectsDirectory = path.join(process.cwd(), 'content/projects');
 const blogDirectory = path.join(process.cwd(), 'content/blog');
 
-export async function getProjects() {
+export interface Project {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  image?: string;
+  tags?: string[];
+  github?: string;
+  demo?: string;
+  content: string;
+}
+
+export interface BlogPost {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  content: string;
+}
+
+export async function getProjects(): Promise<Project[]> {
   const files = fs.readdirSync(projectsDirectory);
-  
+
   const projects = files
     .filter((file) => file.endsWith('.mdx'))
     .map((file) => {
       const filePath = path.join(projectsDirectory, file);
       const fileContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(fileContent);
-      
+
       return {
         slug: file.replace('.mdx', ''),
         ...data,
         content,
-      };
+      } as Project;
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-  
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return projects;
 }
 
-export async function getProject(slug) {
+export async function getProject(slug: string): Promise<Project | null> {
   const filePath = path.join(projectsDirectory, `${slug}.mdx`);
-  
+
   if (!fs.existsSync(filePath)) return null;
-  
+
   const fileContent = fs.readFileSync(filePath, 'utf8');
   const { data, content } = matter(fileContent);
-  
-  return { slug, ...data, content };
+
+  return { slug, ...data, content } as Project;
 }
 
-export async function getBlogPosts() {
+export async function getBlogPosts(): Promise<BlogPost[]> {
   const files = fs.readdirSync(blogDirectory);
-  
+
   const posts = files
     .filter((file) => file.endsWith('.mdx'))
     .map((file) => {
       const filePath = path.join(blogDirectory, file);
       const fileContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(fileContent);
-      
+
       return {
         slug: file.replace('.mdx', ''),
         ...data,
         content,
-      };
+      } as BlogPost;
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-  
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return posts;
 }
 
-export async function getBlogPost(slug) {
+export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   const filePath = path.join(blogDirectory, `${slug}.mdx`);
-  
+
   if (!fs.existsSync(filePath)) return null;
-  
+
   const fileContent = fs.readFileSync(filePath, 'utf8');
   const { data, content } = matter(fileContent);
-  
-  return { slug, ...data, content };
+
+  return { slug, ...data, content } as BlogPost;
 }
 ```
 
 ### Components
 
-```jsx
-// components/Header.js
+```tsx
+// components/Header.tsx
 import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
 
-const navLinks = [
+interface NavLink {
+  href: string;
+  label: string;
+}
+
+const navLinks: NavLink[] = [
   { href: '/', label: 'Home' },
   { href: '/projects', label: 'Projects' },
   { href: '/blog', label: 'Blog' },
@@ -345,7 +374,7 @@ export function Header() {
         <Link href="/" className="text-xl font-bold">
           YN
         </Link>
-        
+
         <nav className="flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
@@ -363,11 +392,16 @@ export function Header() {
   );
 }
 
-// components/ProjectCard.js
+// components/ProjectCard.tsx
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Project } from '@/lib/content';
 
-export function ProjectCard({ project }) {
+interface ProjectCardProps {
+  project: Project;
+}
+
+export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       href={`/projects/${project.slug}`}
@@ -401,23 +435,26 @@ export function ProjectCard({ project }) {
   );
 }
 
-// components/ThemeToggle.js
+// components/ThemeToggle.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 
+type Theme = 'light' | 'dark';
+
 export function ThemeToggle() {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') || 
+    const saved =
+      (localStorage.getItem('theme') as Theme) ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setTheme(saved);
     document.documentElement.classList.toggle('dark', saved === 'dark');
   }, []);
 
   const toggle = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
@@ -437,11 +474,12 @@ export function ThemeToggle() {
 
 ### Contact Form
 
-```jsx
-// app/contact/page.js
+```tsx
+// app/contact/page.tsx
+import type { Metadata } from 'next';
 import { ContactForm } from '@/components/ContactForm';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Contact',
 };
 
@@ -451,7 +489,7 @@ export default function ContactPage() {
       <h1 className="text-4xl font-bold mb-8">Get in Touch</h1>
       <div className="max-w-lg">
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Have a project in mind? Let's talk about it.
+          Have a project in mind? Let&apos;s talk about it.
         </p>
         <ContactForm />
       </div>
@@ -459,14 +497,17 @@ export default function ContactPage() {
   );
 }
 
-// components/ContactForm.js
+// components/ContactForm.tsx
 'use client';
 
 import { useActionState } from 'react';
-import { submitContact } from '@/app/actions';
+import { submitContact, type ContactFormState } from '@/app/actions';
 
 export function ContactForm() {
-  const [state, formAction, isPending] = useActionState(submitContact, null);
+  const [state, formAction, isPending] = useActionState<ContactFormState, FormData>(
+    submitContact,
+    null
+  );
 
   return (
     <form action={formAction} className="space-y-6">
@@ -475,10 +516,10 @@ export function ContactForm() {
           {state.error}
         </div>
       )}
-      
+
       {state?.success && (
         <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg">
-          Thanks for your message! I'll get back to you soon.
+          Thanks for your message! I&apos;ll get back to you soon.
         </div>
       )}
 
@@ -525,17 +566,24 @@ export function ContactForm() {
 
 ### Server Actions
 
-```jsx
-// app/actions.js
+```tsx
+// app/actions.ts
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 
-export async function submitContact(prevState, formData) {
-  const name = formData.get('name');
-  const email = formData.get('email');
-  const message = formData.get('message');
+export type ContactFormState = {
+  error?: string;
+  success?: boolean;
+} | null;
+
+export async function submitContact(
+  prevState: ContactFormState,
+  formData: FormData
+): Promise<ContactFormState> {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const message = formData.get('message') as string;
 
   // Validation
   if (!name || name.length < 2) {

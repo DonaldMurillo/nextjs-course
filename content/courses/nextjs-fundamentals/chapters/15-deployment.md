@@ -54,7 +54,7 @@ NEXT_PUBLIC_API_URL=https://api.example.com
 {
   "regions": ["iad1"],
   "functions": {
-    "app/api/**/*.js": {
+    "app/api/**/*.ts": {
       "memory": 1024,
       "maxDuration": 10
     }
@@ -99,9 +99,10 @@ pm2 startup
 pm2 save
 ```
 
-### ecosystem.config.js
+### ecosystem.config.cjs
 
 ```js
+// ecosystem.config.cjs (CommonJS for PM2)
 module.exports = {
   apps: [{
     name: 'nextjs',
@@ -118,7 +119,7 @@ module.exports = {
 ```
 
 ```bash
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 ```
 
 ### Nginx Reverse Proxy
@@ -196,13 +197,17 @@ ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-### next.config.js for Standalone
+### next.config.ts for Standalone
 
-```js
-// next.config.js
-module.exports = {
+```ts
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   output: 'standalone',
-}
+};
+
+export default config;
 ```
 
 ### Docker Compose
@@ -246,11 +251,15 @@ docker-compose logs -f nextjs
 
 For fully static sites without server-side features:
 
-```js
-// next.config.js
-module.exports = {
+```ts
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
   output: 'export',
-}
+};
+
+export default config;
 ```
 
 ```bash
@@ -304,12 +313,12 @@ API_SECRET=secret123
 
 ### Validation
 
-```js
-// lib/env.js
+```ts
+// lib/env.ts
 const requiredEnvVars = [
   'DATABASE_URL',
   'NEXTAUTH_SECRET',
-];
+] as const;
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {

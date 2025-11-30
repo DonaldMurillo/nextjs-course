@@ -314,11 +314,11 @@
             ]
         },
         {
-            "id": "12-authentication-patterns",
+            "id": "12-authentication",
             "title": "Authentication Patterns",
             "part": "part-4",
             "order": 12,
-            "file": "12-authentication-patterns.md",
+            "file": "12-authentication.md",
             "subchapters": [
                 {
                     "id": "12.1-protecting-routes-middleware",
@@ -329,11 +329,11 @@
             ]
         },
         {
-            "id": "13-error-handling-debugging",
+            "id": "13-error-handling",
             "title": "Error Handling & Debugging",
             "part": "part-5",
             "order": 13,
-            "file": "13-error-handling-debugging.md",
+            "file": "13-error-handling.md",
             "subchapters": []
         },
         {
@@ -353,11 +353,11 @@
             "subchapters": []
         },
         {
-            "id": "16-capstone-portfolio",
+            "id": "16-capstone-project",
             "title": "Project: Developer Portfolio",
             "part": "part-6",
             "order": 16,
-            "file": "16-capstone-portfolio.md",
+            "file": "16-capstone-project.md",
             "subchapters": []
         },
         {

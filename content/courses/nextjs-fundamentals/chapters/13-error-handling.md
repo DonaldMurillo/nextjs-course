@@ -504,4 +504,4 @@ export async function updatePost(postId, formData) {
 
 ---
 
-**Next Chapter:** [14. Performance Optimization](./14-performance.md) - Optimize your Next.js application for speed.
+**Next Chapter:** [14. Performance Optimization](./14-performance-optimization.md) - Optimize your Next.js application for speed.
