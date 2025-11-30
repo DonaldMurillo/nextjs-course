@@ -407,7 +407,3 @@ npx prisma studio
 # Linting
 npm run lint
 ```
-
----
-
-This completes the Next.js Fundamentals course! Return to [Chapter 1: Introduction](./01-introduction.md) to review or explore any chapter using the navigation links.

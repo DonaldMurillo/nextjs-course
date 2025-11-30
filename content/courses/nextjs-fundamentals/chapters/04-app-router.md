@@ -225,6 +225,3 @@ This chapter is divided into sub-chapters:
 - [Next.js: Project Structure](https://nextjs.org/docs/getting-started/project-structure)
 - [Vercel: App Router Explained (Video)](https://www.youtube.com/watch?v=DrxiNfbr63s)
 
----
-
-**Next:** [4.1 File Conventions](./04.1-file-conventions.md) - Learn about the special files that power the App Router.

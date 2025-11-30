@@ -299,6 +299,3 @@ app/[category]/[subcategory]/[productId]/page.tsx
 - [Next.js: Linking and Navigating](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating)
 - [Next.js: Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
 
----
-
-**Next:** [5.1 Dynamic Routes](./05.1-dynamic-routes.md) - Master dynamic URL parameters and catch-all routes.

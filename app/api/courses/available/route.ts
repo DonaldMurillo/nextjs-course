@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAvailableCourses } from '@/lib/courseLibrary';
 
+// Disable caching to always get fresh course list
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const courses = await getAvailableCourses();

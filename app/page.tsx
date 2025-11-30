@@ -2,12 +2,15 @@
 
 import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/lib/db"
+import { useCourseSync } from "@/hooks/useCourseSync"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Loader2, RefreshCw } from "lucide-react"
 
 export default function Home() {
+  const { syncing, newCoursesImported, coursesUpdated, syncCourses } = useCourseSync()
   const courses = useLiveQuery(() => db.courses.orderBy('order').toArray())
   const chapters = useLiveQuery(() => db.chapters.toArray())
   const subchapters = useLiveQuery(() => db.subchapters.toArray())
@@ -91,9 +94,37 @@ export default function Home() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">My Courses</h1>
-          <p className="text-muted-foreground">Manage and learn from your courses</p>
+          <p className="text-muted-foreground">
+            {syncing ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Syncing courses...
+              </span>
+            ) : (
+              "Manage and learn from your courses"
+            )}
+          </p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => syncCourses()}
+          disabled={syncing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+          Sync
+        </Button>
       </div>
+
+      {/* Sync notification */}
+      {(newCoursesImported > 0 || coursesUpdated > 0) && !syncing && (
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <p className="text-sm text-green-800 dark:text-green-200">
+            {newCoursesImported > 0 && `${newCoursesImported} new course${newCoursesImported > 1 ? "s" : ""} imported. `}
+            {coursesUpdated > 0 && `${coursesUpdated} course${coursesUpdated > 1 ? "s" : ""} updated.`}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content Area */}

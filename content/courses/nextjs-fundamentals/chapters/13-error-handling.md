@@ -502,6 +502,3 @@ export async function updatePost(postId, formData) {
 - [Next.js: Error Handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling)
 - [React Error Boundaries](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)
 
----
-
-**Next Chapter:** [14. Performance Optimization](./14-performance-optimization.md) - Optimize your Next.js application for speed.

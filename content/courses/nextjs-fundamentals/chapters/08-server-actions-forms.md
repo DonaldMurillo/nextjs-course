@@ -197,6 +197,3 @@ function LikeButton({ postId }) {
 - [React: Server Actions](https://react.dev/reference/rsc/server-actions)
 - [Next.js: Forms and Mutations](https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations)
 
----
-
-**Next:** [8.1 Server Actions Basics](./08.1-server-actions-basics.md) - Learn the fundamentals of Server Actions.

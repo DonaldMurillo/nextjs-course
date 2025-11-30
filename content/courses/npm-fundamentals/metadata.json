@@ -1,0 +1,57 @@
+{
+    "id": "nodejs-package-managers",
+    "title": "Node.js & Package Managers",
+    "description": "A concise introduction to Node.js, npm, and pnpm. Learn what Node.js is, why it's used, and how to manage packages with npm and pnpm.",
+    "author": "CourseApp",
+    "version": "1.0.0",
+    "nodeVersion": "20+",
+    "order": 0,
+    "tags": [
+        "nodejs",
+        "npm",
+        "pnpm",
+        "package-managers",
+        "javascript",
+        "backend"
+    ],
+    "difficulty": "beginner",
+    "estimatedHours": 2,
+    "prerequisites": [
+        "Basic programming knowledge",
+        "Familiarity with command line",
+        "Basic JavaScript understanding helpful but not required"
+    ],
+    "parts": [
+        {
+            "id": "part-1",
+            "title": "Fundamentals",
+            "order": 1
+        }
+    ],
+    "chapters": [
+        {
+            "id": "01-what-is-nodejs",
+            "title": "What is Node.js?",
+            "part": "part-1",
+            "order": 1,
+            "file": "01-what-is-nodejs.md",
+            "subchapters": []
+        },
+        {
+            "id": "02-npm",
+            "title": "npm - Node Package Manager",
+            "part": "part-1",
+            "order": 2,
+            "file": "02-npm.md",
+            "subchapters": []
+        },
+        {
+            "id": "03-pnpm",
+            "title": "pnpm - Fast, Efficient Package Manager",
+            "part": "part-1",
+            "order": 3,
+            "file": "03-pnpm.md",
+            "subchapters": []
+        }
+    ]
+}

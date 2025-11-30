@@ -518,6 +518,3 @@ Many teams prefer pnpm for its speed and disk efficiency.
 - [Next.js Project Structure](https://nextjs.org/docs/getting-started/project-structure)
 - [Environment Variables in Next.js](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables)
 
----
-
-**Next Chapter:** [React Essentials for Next.js](./03-react-essentials.md) - Learn the React fundamentals you need before diving into Next.js features.

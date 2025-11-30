@@ -215,6 +215,3 @@ Learn how to set up Prisma ORM with SQLite for database operations.
 - [MDN: Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)
 - [MDN: Request](https://developer.mozilla.org/en-US/docs/Web/API/Request)
 
----
-
-**Next:** [11.1 Database with Prisma](./11.1-prisma-database.md) - Set up Prisma ORM with your Next.js application.

@@ -9,8 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { NoteTaker } from "@/components/NoteTaker"
 import { CourseHeader } from "@/components/CourseHeader"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { CheckCircle2, Circle, ChevronRight, ChevronDown } from "lucide-react"
+import { CheckCircle2, Circle, ChevronRight, ChevronDown, ChevronLeft } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function CoursePage() {
     const params = useParams()
@@ -89,6 +90,60 @@ export default function CoursePage() {
     const displayTitle = currentSubchapter
         ? `${getSubchapterNumber(currentChapterNumber, currentSubchapter.order)} ${currentSubchapter.title}`
         : `${currentChapterNumber}. ${currentChapter?.title || ''}`
+
+    // Build flat navigation list (chapters and subchapters in order)
+    type NavItem = {
+        type: 'chapter' | 'subchapter'
+        chapterId: string
+        subchapterId?: string
+        title: string
+        number: string
+    }
+
+    const navItems: NavItem[] = []
+    if (chapters && subchapters) {
+        const sortedChapters = [...chapters].sort((a, b) => a.order - b.order)
+        for (const chapter of sortedChapters) {
+            navItems.push({
+                type: 'chapter',
+                chapterId: chapter.chapterId,
+                title: chapter.title,
+                number: `${chapter.order}`
+            })
+            const chapterSubs = subchapters
+                .filter(s => s.chapterId === chapter.chapterId)
+                .sort((a, b) => a.order - b.order)
+            for (const sub of chapterSubs) {
+                navItems.push({
+                    type: 'subchapter',
+                    chapterId: chapter.chapterId,
+                    subchapterId: sub.subchapterId,
+                    title: sub.title,
+                    number: `${chapter.order}.${sub.order}`
+                })
+            }
+        }
+    }
+
+    // Find current index and prev/next items
+    const currentNavIndex = navItems.findIndex(item => {
+        if (currentSubchapter) {
+            return item.type === 'subchapter' &&
+                   item.chapterId === currentChapter?.chapterId &&
+                   item.subchapterId === currentSubchapter.subchapterId
+        }
+        return item.type === 'chapter' && item.chapterId === currentChapter?.chapterId
+    })
+
+    const prevItem = currentNavIndex > 0 ? navItems[currentNavIndex - 1] : null
+    const nextItem = currentNavIndex < navItems.length - 1 ? navItems[currentNavIndex + 1] : null
+
+    const getNavUrl = (item: NavItem) => {
+        if (item.type === 'subchapter') {
+            return `/course/${courseId}?chapter=${item.chapterId}&subchapter=${item.subchapterId}`
+        }
+        return `/course/${courseId}?chapter=${item.chapterId}`
+    }
 
     if (!course || !chapters || !currentChapter) {
         return (
@@ -243,10 +298,47 @@ export default function CoursePage() {
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto pr-4">
-                    <article className="max-w-3xl mx-auto pb-20">
+                    <article className="max-w-3xl mx-auto pb-8">
                         <h2 className="text-2xl font-bold mb-4">{displayTitle}</h2>
                         <MarkdownRenderer content={displayContent} />
                     </article>
+
+                    {/* Chapter Navigation */}
+                    <nav className="max-w-3xl mx-auto border-t pt-6 pb-12">
+                        <div className="flex items-center justify-between gap-4">
+                            {prevItem ? (
+                                <Link href={getNavUrl(prevItem)} className="flex-1 max-w-[45%]">
+                                    <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-start gap-1">
+                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                            <ChevronLeft className="h-3 w-3" />
+                                            Previous
+                                        </span>
+                                        <span className="text-sm font-medium text-left line-clamp-1">
+                                            {prevItem.number}. {prevItem.title}
+                                        </span>
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <div className="flex-1 max-w-[45%]" />
+                            )}
+
+                            {nextItem ? (
+                                <Link href={getNavUrl(nextItem)} className="flex-1 max-w-[45%]">
+                                    <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-end gap-1">
+                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                            Next
+                                            <ChevronRight className="h-3 w-3" />
+                                        </span>
+                                        <span className="text-sm font-medium text-right line-clamp-1">
+                                            {nextItem.number}. {nextItem.title}
+                                        </span>
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <div className="flex-1 max-w-[45%]" />
+                            )}
+                        </div>
+                    </nav>
                 </div>
 
                 {/* Notes Sidebar */}

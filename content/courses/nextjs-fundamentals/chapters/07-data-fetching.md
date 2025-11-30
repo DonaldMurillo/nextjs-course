@@ -226,6 +226,3 @@ This chapter is divided into sub-chapters:
 - [Next.js: fetch API Extensions](https://nextjs.org/docs/app/api-reference/functions/fetch)
 - [Vercel: Understanding Next.js Caching](https://nextjs.org/docs/app/building-your-application/caching)
 
----
-
-**Next:** [7.1 Fetching in Server Components](./07.1-fetching-server-components.md) - Learn the fundamentals of fetching data in Server Components.

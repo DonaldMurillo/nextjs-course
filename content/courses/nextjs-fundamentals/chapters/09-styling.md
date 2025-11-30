@@ -120,6 +120,3 @@ export function Button({ children }) {
 - [Next.js: Tailwind CSS](https://nextjs.org/docs/app/building-your-application/styling/tailwind-css)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
----
-
-**Next:** [9.1 CSS Modules](./09.1-css-modules.md) - Learn component-scoped styling with CSS Modules.

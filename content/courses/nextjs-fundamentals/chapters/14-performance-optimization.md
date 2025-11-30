@@ -554,6 +554,3 @@ export async function revalidateProducts() {
 - [Web Vitals](https://web.dev/vitals/)
 - [Chrome DevTools Performance](https://developer.chrome.com/docs/devtools/performance/)
 
----
-
-**Next Chapter:** [15. Deployment](./15-deployment.md) - Deploy your Next.js application to production.

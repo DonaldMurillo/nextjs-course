@@ -202,6 +202,3 @@ Each chapter builds knowledge you'll apply in the final project.
 - [Vercel YouTube Channel](https://www.youtube.com/c/VercelHQ) - Official tutorials
 - [React Documentation](https://react.dev) - React fundamentals
 
----
-
-**Next Chapter:** [Development Environment Setup](./02-development-setup.md) - Get your machine ready to build Next.js applications.

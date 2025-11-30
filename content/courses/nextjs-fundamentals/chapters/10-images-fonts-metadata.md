@@ -578,6 +578,3 @@ sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 - [Next.js Metadata](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)
 - [Schema.org](https://schema.org) - Structured data reference
 
----
-
-**Next Chapter:** [11. API Routes](./11-api-routes.md) - Create API endpoints with Route Handlers.

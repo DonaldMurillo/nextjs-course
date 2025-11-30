@@ -266,6 +266,3 @@ This chapter is divided into sub-chapters:
 - [React: Server Components RFC](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md)
 - [Dan Abramov: Server Components Intro](https://github.com/reactwg/server-components/discussions/5)
 
----
-
-**Next:** [6.1 The Mental Model](./06.1-mental-model.md) - Understand how Server and Client Components really work.

@@ -431,6 +431,3 @@ jobs:
 - [Vercel Documentation](https://vercel.com/docs)
 - [Docker Documentation](https://docs.docker.com)
 
----
-
-**Next Chapter:** [16. Capstone Project](./16-capstone-project.md) - Build a complete developer portfolio with everything you've learned.

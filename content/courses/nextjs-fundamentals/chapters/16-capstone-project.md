@@ -684,9 +684,3 @@ Congratulations! You've built a complete, production-ready developer portfolio u
 - Content management with MDX
 
 Use this as a foundation and customize it to showcase your work!
-
----
-
-**Congratulations on completing the Next.js Fundamentals course!**
-
-Return to [Resources & References](./17-resources-references.md) for continued learning, or check the [Quick Reference](./18-quick-reference.md) for a handy cheat sheet.

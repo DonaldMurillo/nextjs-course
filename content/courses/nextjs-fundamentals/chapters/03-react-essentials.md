@@ -232,6 +232,3 @@ For Next.js development, you need to understand:
 - [React Hooks Documentation](https://react.dev/reference/react/hooks)
 - [Next.js React Essentials](https://nextjs.org/docs/app/building-your-application/rendering) - How Next.js uses React
 
----
-
-**Next:** [3.1 Components & JSX](./03.1-components-jsx.md) - Start building with React's fundamental building blocks.

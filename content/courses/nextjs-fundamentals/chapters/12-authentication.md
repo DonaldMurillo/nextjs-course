@@ -547,6 +547,3 @@ export async function GET() {
 - [Next.js Authentication](https://nextjs.org/docs/app/building-your-application/authentication)
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 
----
-
-**Next Chapter:** [13. Error Handling](./13-error-handling.md) - Handle errors gracefully throughout your application.

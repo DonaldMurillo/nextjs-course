@@ -187,6 +187,3 @@ npx prisma generate
 | `not-found.tsx` | 404 UI |
 | `route.ts` | API endpoint |
 
----
-
-**Next:** [18. Quick Reference / Cheat Sheet](./18-quick-reference.md) - Quick lookup for common patterns and code snippets.
