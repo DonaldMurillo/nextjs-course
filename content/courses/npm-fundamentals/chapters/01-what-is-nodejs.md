@@ -195,6 +195,3 @@ console.log('Free memory:', os.freemem());
 - [Node.js Documentation](https://nodejs.org/docs)
 - [Node.js Built-in Modules](https://nodejs.org/api)
 
----
-
-**Next:** [Chapter 2: npm - Node Package Manager](./02-npm.md)

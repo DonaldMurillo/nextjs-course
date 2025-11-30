@@ -1,0 +1,68 @@
+{
+  "id": "eslint-prettier-vscode-tooling",
+  "title": "Modern JS Tooling: ESLint, Prettier, Git Hooks & VS Code",
+  "description": "Learn how to keep your JavaScript/TypeScript projects clean, consistent, and automated using ESLint, Prettier, Git pre-commit hooks, and VS Code extensions.",
+  "author": "CourseApp",
+  "version": "1.0.0",
+  "nodeVersion": "20+",
+  "order": 2,
+  "tags": [
+    "eslint",
+    "prettier",
+    "git-hooks",
+    "husky",
+    "lint-staged",
+    "vscode",
+    "tooling",
+    "javascript",
+    "typescript"
+  ],
+  "difficulty": "beginner",
+  "estimatedHours": 2,
+  "prerequisites": [
+    "Basic JavaScript or TypeScript",
+    "Comfortable running npm scripts",
+    "Git installed and basic Git workflow"
+  ],
+  "parts": [
+    {
+      "id": "part-1",
+      "title": "Developer Experience Essentials",
+      "order": 1
+    }
+  ],
+  "chapters": [
+    {
+      "id": "01-eslint-basics",
+      "title": "ESLint: Keeping Your Code Clean",
+      "part": "part-1",
+      "order": 1,
+      "file": "01-eslint-basics.md",
+      "subchapters": []
+    },
+    {
+      "id": "02-prettier",
+      "title": "Prettier: Automatic Code Formatting",
+      "part": "part-1",
+      "order": 2,
+      "file": "02-prettier.md",
+      "subchapters": []
+    },
+    {
+      "id": "03-precommit-hooks",
+      "title": "Pre-Commit Hooks with Husky & lint-staged",
+      "part": "part-1",
+      "order": 3,
+      "file": "03-precommit-hooks.md",
+      "subchapters": []
+    },
+    {
+      "id": "04-vscode-and-extensions",
+      "title": "VS Code & Extensions: Glueing It All Together",
+      "part": "part-1",
+      "order": 4,
+      "file": "04-vscode-and-extensions.md",
+      "subchapters": []
+    }
+  ]
+}

@@ -388,7 +388,3 @@ npx npm-check-updates -i
 - [npm Registry](https://www.npmjs.com)
 - [Semantic Versioning](https://semver.org)
 - [package.json Reference](https://docs.npmjs.com/cli/v10/configuring-npm/package-json)
-
----
-
-**Next:** [Chapter 3: pnpm - Fast, Efficient Package Manager](./03-pnpm.md)

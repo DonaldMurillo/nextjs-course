@@ -32,6 +32,16 @@ export function NoteTaker({ courseId, chapterId, subchapterId, onCollapseChange 
         [courseId, chapterId, subchapterId]
     )
 
+    const chapters = useLiveQuery(
+        () => db.chapters.where('courseId').equals(courseId).toArray(),
+        [courseId]
+    )
+
+    const subchapters = useLiveQuery(
+        () => db.subchapters.where('courseId').equals(courseId).toArray(),
+        [courseId]
+    )
+
     const [isAdding, setIsAdding] = useState(false)
     const [newTitle, setNewTitle] = useState("")
     const [newContent, setNewContent] = useState("")
@@ -82,6 +92,18 @@ export function NoteTaker({ courseId, chapterId, subchapterId, onCollapseChange 
             newSet.delete(id)
             return newSet
         })
+    }
+
+    const getNoteContext = (note: any) => {
+        if (chapterId) return null // Don't show context if we're already in a specific chapter view
+
+        const noteChapter = chapters?.find(c => c.chapterId === note.chapterId)
+        const noteSubchapter = subchapters?.find(s => s.subchapterId === note.subchapterId && s.chapterId === note.chapterId)
+
+        if (noteSubchapter) {
+            return `${noteChapter?.title || ''} > ${noteSubchapter.title}`
+        }
+        return noteChapter?.title || ''
     }
 
     return (
@@ -156,6 +178,8 @@ export function NoteTaker({ courseId, chapterId, subchapterId, onCollapseChange 
 
                         {notes?.map((note) => {
                             const isExpanded = expandedNotes.has(note.id)
+                            const context = getNoteContext(note)
+
                             return (
                                 <Card key={note.id} className="relative group">
                                     <CardHeader
@@ -163,9 +187,16 @@ export function NoteTaker({ courseId, chapterId, subchapterId, onCollapseChange 
                                         onClick={() => toggleNoteExpansion(note.id)}
                                     >
                                         <div className="flex items-center justify-between pr-6">
-                                            <CardTitle className="text-base font-medium">
-                                                {note.title}
-                                            </CardTitle>
+                                            <div className="space-y-1">
+                                                {context && (
+                                                    <p className="text-xs text-muted-foreground font-medium">
+                                                        {context}
+                                                    </p>
+                                                )}
+                                                <CardTitle className="text-base font-medium">
+                                                    {note.title}
+                                                </CardTitle>
+                                            </div>
                                             {isExpanded ? (
                                                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
                                             ) : (

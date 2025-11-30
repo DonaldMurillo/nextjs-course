@@ -9,9 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { NoteTaker } from "@/components/NoteTaker"
 import { CourseHeader } from "@/components/CourseHeader"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { CheckCircle2, Circle, ChevronRight, ChevronDown, ChevronLeft } from "lucide-react"
+import { CheckCircle2, Circle, ChevronRight, ChevronDown, ChevronLeft, BookOpen, StickyNote, Home } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function CoursePage() {
     const params = useParams()
@@ -38,8 +40,9 @@ export default function CoursePage() {
     )
     const progress = useLiveQuery(() => db.progress.toArray(), [])
 
-    // Get current chapter or first chapter
-    const currentChapter = chapters?.find(c => c.chapterId === chapterId) || chapters?.[0]
+    // Get current chapter (don't default to first one anymore)
+    const currentChapter = chapters?.find(c => c.chapterId === chapterId)
+
     // Get current subchapter if specified
     const currentSubchapter = subchapterId
         ? subchapters?.find(s => s.subchapterId === subchapterId && s.chapterId === currentChapter?.chapterId)
@@ -89,7 +92,9 @@ export default function CoursePage() {
     const currentChapterNumber = currentChapter?.order || 1
     const displayTitle = currentSubchapter
         ? `${getSubchapterNumber(currentChapterNumber, currentSubchapter.order)} ${currentSubchapter.title}`
-        : `${currentChapterNumber}. ${currentChapter?.title || ''}`
+        : currentChapter
+            ? `${currentChapterNumber}. ${currentChapter.title}`
+            : course?.title || 'Course Overview'
 
     // Build flat navigation list (chapters and subchapters in order)
     type NavItem = {
@@ -129,14 +134,15 @@ export default function CoursePage() {
     const currentNavIndex = navItems.findIndex(item => {
         if (currentSubchapter) {
             return item.type === 'subchapter' &&
-                   item.chapterId === currentChapter?.chapterId &&
-                   item.subchapterId === currentSubchapter.subchapterId
+                item.chapterId === currentChapter?.chapterId &&
+                item.subchapterId === currentSubchapter.subchapterId
         }
         return item.type === 'chapter' && item.chapterId === currentChapter?.chapterId
     })
 
     const prevItem = currentNavIndex > 0 ? navItems[currentNavIndex - 1] : null
-    const nextItem = currentNavIndex < navItems.length - 1 ? navItems[currentNavIndex + 1] : null
+    const nextItem = currentNavIndex < navItems.length - 1 ? navItems[currentNavIndex + 1] :
+        (currentNavIndex === -1 && navItems.length > 0) ? navItems[0] : null
 
     const getNavUrl = (item: NavItem) => {
         if (item.type === 'subchapter') {
@@ -145,7 +151,7 @@ export default function CoursePage() {
         return `/course/${courseId}?chapter=${item.chapterId}`
     }
 
-    if (!course || !chapters || !currentChapter) {
+    if (!course || !chapters) {
         return (
             <div className="container mx-auto py-10 px-4">
                 <div className="space-y-4">
@@ -162,14 +168,20 @@ export default function CoursePage() {
         <div className="container mx-auto py-6 px-4 max-w-[1600px] h-[calc(100vh-4rem)] flex flex-col">
             <CourseHeader
                 courseId={courseId}
-                chapterId={currentChapter.chapterId}
+                chapterId={currentChapter?.chapterId || ''}
                 subchapterId={currentSubchapter?.subchapterId}
                 title={course.title}
             />
 
             <div className="flex flex-col lg:flex-row gap-8 flex-1 overflow-hidden">
                 {/* Chapter Sidebar */}
-                <div className="w-full lg:w-72 flex-shrink-0 overflow-y-auto">
+                <div className="w-full lg:w-72 flex-shrink-0 overflow-y-auto hidden lg:block">
+                    <Link href={`/course/${courseId}`} className="mb-4 block">
+                        <Button variant="outline" className="w-full justify-start gap-2">
+                            <Home className="h-4 w-4" />
+                            Course Home
+                        </Button>
+                    </Link>
                     <h3 className="font-semibold mb-4">Contents</h3>
                     <div className="space-y-1">
                         {parts && parts.length > 0 ? (
@@ -192,7 +204,7 @@ export default function CoursePage() {
                                         <div className="space-y-1 border-l border-border ml-2 pl-2">
                                             {getChaptersForPart(part.partId).map((chapter) => {
                                                 const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
-                                                const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+                                                const isCurrentChapter = currentChapter?.id === chapter.id && !currentSubchapter
                                                 const chapterNum = getChapterNumber(chapter.order)
 
                                                 return (
@@ -246,7 +258,7 @@ export default function CoursePage() {
                             // Fallback: render chapters without parts
                             chapters.map((chapter) => {
                                 const chapterSubchapters = getSubchaptersForChapter(chapter.chapterId)
-                                const isCurrentChapter = currentChapter.id === chapter.id && !currentSubchapter
+                                const isCurrentChapter = currentChapter?.id === chapter.id && !currentSubchapter
                                 const chapterNum = getChapterNumber(chapter.order)
 
                                 return (
@@ -298,47 +310,135 @@ export default function CoursePage() {
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto pr-4">
-                    <article className="max-w-3xl mx-auto pb-8">
-                        <h2 className="text-2xl font-bold mb-4">{displayTitle}</h2>
-                        <MarkdownRenderer content={displayContent} />
-                    </article>
+                    {currentChapter ? (
+                        <>
+                            <article className="max-w-3xl mx-auto pb-8">
+                                <h2 className="text-2xl font-bold mb-4">{displayTitle}</h2>
+                                <MarkdownRenderer content={displayContent} />
+                            </article>
 
-                    {/* Chapter Navigation */}
-                    <nav className="max-w-3xl mx-auto border-t pt-6 pb-12">
-                        <div className="flex items-center justify-between gap-4">
-                            {prevItem ? (
-                                <Link href={getNavUrl(prevItem)} className="flex-1 max-w-[45%]">
-                                    <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-start gap-1">
-                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                            <ChevronLeft className="h-3 w-3" />
-                                            Previous
-                                        </span>
-                                        <span className="text-sm font-medium text-left line-clamp-1">
-                                            {prevItem.number}. {prevItem.title}
-                                        </span>
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <div className="flex-1 max-w-[45%]" />
-                            )}
+                            {/* Chapter Navigation */}
+                            <nav className="max-w-3xl mx-auto border-t pt-6 pb-12">
+                                <div className="flex items-center justify-between gap-4">
+                                    {prevItem ? (
+                                        <Link href={getNavUrl(prevItem)} className="flex-1 max-w-[45%]">
+                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-start gap-1">
+                                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    <ChevronLeft className="h-3 w-3" />
+                                                    Previous
+                                                </span>
+                                                <span className="text-sm font-medium text-left line-clamp-1">
+                                                    {prevItem.number}. {prevItem.title}
+                                                </span>
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <div className="flex-1 max-w-[45%]" />
+                                    )}
 
-                            {nextItem ? (
-                                <Link href={getNavUrl(nextItem)} className="flex-1 max-w-[45%]">
-                                    <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-end gap-1">
-                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                            Next
-                                            <ChevronRight className="h-3 w-3" />
-                                        </span>
-                                        <span className="text-sm font-medium text-right line-clamp-1">
-                                            {nextItem.number}. {nextItem.title}
-                                        </span>
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <div className="flex-1 max-w-[45%]" />
-                            )}
+                                    {nextItem ? (
+                                        <Link href={getNavUrl(nextItem)} className="flex-1 max-w-[45%]">
+                                            <Button variant="outline" className="w-full h-auto py-3 px-4 flex flex-col items-end gap-1">
+                                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    Next
+                                                    <ChevronRight className="h-3 w-3" />
+                                                </span>
+                                                <span className="text-sm font-medium text-right line-clamp-1">
+                                                    {nextItem.number}. {nextItem.title}
+                                                </span>
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <div className="flex-1 max-w-[45%]" />
+                                    )}
+                                </div>
+                            </nav>
+                        </>
+                    ) : (
+                        <div className="max-w-4xl mx-auto">
+                            <h1 className="text-3xl font-bold mb-6">{course.title}</h1>
+                            <Tabs defaultValue="chapters" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 mb-8">
+                                    <TabsTrigger value="chapters" className="flex items-center gap-2">
+                                        <BookOpen className="h-4 w-4" />
+                                        Chapters
+                                    </TabsTrigger>
+                                    <TabsTrigger value="notes" className="flex items-center gap-2">
+                                        <StickyNote className="h-4 w-4" />
+                                        My Notes
+                                    </TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="chapters">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Course Content</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            {parts && parts.length > 0 ? (
+                                                parts.map((part) => (
+                                                    <div key={part.id} className="space-y-2">
+                                                        <h3 className="font-semibold text-lg text-muted-foreground">Part {part.order}: {part.title}</h3>
+                                                        <div className="grid gap-2">
+                                                            {getChaptersForPart(part.partId).map((chapter) => (
+                                                                <Link
+                                                                    key={chapter.id}
+                                                                    href={`/course/${courseId}?chapter=${chapter.chapterId}`}
+                                                                    className="block"
+                                                                >
+                                                                    <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                                                                        <div className="flex items-center gap-3">
+                                                                            {isChapterComplete(chapter.chapterId) ? (
+                                                                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                                                            ) : (
+                                                                                <Circle className="h-5 w-5 text-muted-foreground" />
+                                                                            )}
+                                                                            <div>
+                                                                                <p className="font-medium">{chapter.order}. {chapter.title}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                                                    </div>
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="grid gap-2">
+                                                    {chapters.map((chapter) => (
+                                                        <Link
+                                                            key={chapter.id}
+                                                            href={`/course/${courseId}?chapter=${chapter.chapterId}`}
+                                                            className="block"
+                                                        >
+                                                            <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                                                                <div className="flex items-center gap-3">
+                                                                    {isChapterComplete(chapter.chapterId) ? (
+                                                                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                                                    ) : (
+                                                                        <Circle className="h-5 w-5 text-muted-foreground" />
+                                                                    )}
+                                                                    <div>
+                                                                        <p className="font-medium">{chapter.order}. {chapter.title}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                                            </div>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+                                <TabsContent value="notes">
+                                    <div className="h-[600px]">
+                                        <NoteTaker courseId={courseId} />
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </div>
-                    </nav>
+                    )}
                 </div>
 
                 {/* Notes Sidebar */}
@@ -346,7 +446,7 @@ export default function CoursePage() {
                     }`}>
                     <NoteTaker
                         courseId={courseId}
-                        chapterId={currentChapter.chapterId}
+                        chapterId={currentChapter?.chapterId}
                         subchapterId={currentSubchapter?.subchapterId}
                         onCollapseChange={setIsNotesPanelCollapsed}
                     />
