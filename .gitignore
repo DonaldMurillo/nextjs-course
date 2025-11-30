@@ -20,6 +20,9 @@
 # generated static data
 /public/data/
 
+# pagefind search index (generated at build time)
+/public/pagefind/
+
 # production
 /build
 

@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm run generate-courses && next dev",
-    "build": "pnpm run generate-courses && next build",
+    "dev": "pnpm run generate-courses && pnpm run build-search && next dev",
+    "build": "pnpm run generate-courses && next build && pnpm run build-search",
+    "build-search": "npx tsx scripts/build-search-index.ts",
     "start": "next start",
     "lint": "eslint",
     "generate-courses": "npx tsx scripts/generate-courses.ts"
@@ -26,6 +27,7 @@
     "lucide-react": "^0.555.0",
     "next": "16.0.5",
     "next-themes": "^0.4.6",
+    "pagefind": "^1.4.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-markdown": "^10.1.0",

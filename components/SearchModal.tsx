@@ -1,13 +1,42 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { useLiveQuery } from "dexie-react-hooks"
-import { db } from "@/lib/db"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Search, FileText, BookOpen, Hash, ArrowRight, Command } from "lucide-react"
+import { Search, FileText, BookOpen, Hash, ArrowRight, Command, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+
+// PageFind types
+interface PagefindResult {
+    id: string
+    data: () => Promise<PagefindResultData>
+}
+
+interface PagefindResultData {
+    url: string
+    content: string
+    excerpt: string
+    meta: {
+        title: string
+        type: 'course' | 'chapter' | 'subchapter'
+        courseId: string
+        courseTitle: string
+        chapterId?: string
+        chapterTitle?: string
+        subchapterId?: string
+        description?: string
+    }
+}
+
+interface PagefindSearchResponse {
+    results: PagefindResult[]
+}
+
+interface Pagefind {
+    init: () => Promise<void>
+    search: (query: string, options?: { filters?: Record<string, string> }) => Promise<PagefindSearchResponse>
+}
 
 interface SearchResult {
     type: 'course' | 'chapter' | 'subchapter'
@@ -20,7 +49,7 @@ interface SearchResult {
     chapterTitle?: string
     subchapterId?: string
     url: string
-    matchedContent?: string
+    excerpt?: string
 }
 
 interface SearchModalProps {
@@ -30,127 +59,101 @@ interface SearchModalProps {
 
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     const router = useRouter()
-    const [query, setQueryState] = useState("")
+    const [query, setQuery] = useState("")
     const [selectedIndex, setSelectedIndex] = useState(0)
-    const [prevOpen, setPrevOpen] = useState(open)
+    const [results, setResults] = useState<SearchResult[]>([])
+    const [loading, setLoading] = useState(false)
+    const [pagefind, setPagefind] = useState<Pagefind | null>(null)
+    const [pagefindError, setPagefindError] = useState<string | null>(null)
+    const searchTimeout = useRef<NodeJS.Timeout | null>(null)
+    const prevOpen = useRef(open)
 
-    // Wrap setQuery to also reset selectedIndex
-    const setQuery = (value: string) => {
-        setQueryState(value)
-        setSelectedIndex(0)
-    }
-
-    const courses = useLiveQuery(() => db.courses.toArray())
-    const chapters = useLiveQuery(() => db.chapters.toArray())
-    const subchapters = useLiveQuery(() => db.subchapters.toArray())
-
-    // Reset state when modal opens (using derived state pattern)
-    if (open && !prevOpen) {
-        setQuery("")
-        setSelectedIndex(0)
-    }
-    if (open !== prevOpen) {
-        setPrevOpen(open)
-    }
-
-    // Search logic
-    const results = useMemo((): SearchResult[] => {
-        if (!query.trim() || !courses || !chapters) return []
-
-        const searchTerm = query.toLowerCase().trim()
-        const results: SearchResult[] = []
-
-        // Search courses
-        for (const course of courses) {
-            const titleMatch = course.title.toLowerCase().includes(searchTerm)
-            const descMatch = course.description?.toLowerCase().includes(searchTerm)
-
-            if (titleMatch || descMatch) {
-                results.push({
-                    type: 'course',
-                    id: course.id,
-                    title: course.title,
-                    description: course.description,
-                    courseId: course.id,
-                    courseTitle: course.title,
-                    url: `/course/${course.id}`
-                })
+    // Initialize PageFind
+    useEffect(() => {
+        async function loadPagefind() {
+            try {
+                // @ts-expect-error - Dynamic import with webpackIgnore
+                const pf = await import(/* webpackIgnore: true */ '/pagefind/pagefind.js')
+                await pf.init()
+                setPagefind(pf as Pagefind)
+                setPagefindError(null)
+            } catch (error) {
+                console.error('Failed to load PageFind:', error)
+                setPagefindError('Search index not available. Run build first.')
             }
         }
 
-        // Search chapters
-        for (const chapter of chapters) {
-            const course = courses.find(c => c.id === chapter.courseId)
-            if (!course) continue
+        loadPagefind()
+    }, [])
 
-            const titleMatch = chapter.title.toLowerCase().includes(searchTerm)
-            const contentMatch = chapter.content?.toLowerCase().includes(searchTerm)
+    // Reset state when modal opens
+    useEffect(() => {
+        if (open && !prevOpen.current) {
+            setQuery("")
+            setSelectedIndex(0)
+            setResults([])
+        }
+        prevOpen.current = open
+    }, [open])
 
-            if (titleMatch || contentMatch) {
-                let matchedContent: string | undefined
-                if (contentMatch && chapter.content) {
-                    const idx = chapter.content.toLowerCase().indexOf(searchTerm)
-                    const start = Math.max(0, idx - 40)
-                    const end = Math.min(chapter.content.length, idx + searchTerm.length + 40)
-                    matchedContent = (start > 0 ? '...' : '') + 
-                        chapter.content.slice(start, end).replace(/\n/g, ' ') + 
-                        (end < chapter.content.length ? '...' : '')
-                }
-
-                results.push({
-                    type: 'chapter',
-                    id: chapter.id,
-                    title: chapter.title,
-                    courseId: course.id,
-                    courseTitle: course.title,
-                    chapterId: chapter.chapterId,
-                    url: `/course/${course.id}?chapter=${chapter.chapterId}`,
-                    matchedContent
-                })
-            }
+    // Debounced search
+    useEffect(() => {
+        if (!pagefind || !query.trim()) {
+            setResults([])
+            return
         }
 
-        // Search subchapters
-        if (subchapters) {
-            for (const subchapter of subchapters) {
-                const course = courses.find(c => c.id === subchapter.courseId)
-                const chapter = chapters.find(c => c.chapterId === subchapter.chapterId)
-                if (!course || !chapter) continue
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current)
+        }
 
-                const titleMatch = subchapter.title.toLowerCase().includes(searchTerm)
-                const contentMatch = subchapter.content?.toLowerCase().includes(searchTerm)
-
-                if (titleMatch || contentMatch) {
-                    let matchedContent: string | undefined
-                    if (contentMatch && subchapter.content) {
-                        const idx = subchapter.content.toLowerCase().indexOf(searchTerm)
-                        const start = Math.max(0, idx - 40)
-                        const end = Math.min(subchapter.content.length, idx + searchTerm.length + 40)
-                        matchedContent = (start > 0 ? '...' : '') + 
-                            subchapter.content.slice(start, end).replace(/\n/g, ' ') + 
-                            (end < subchapter.content.length ? '...' : '')
-                    }
-
-                    results.push({
-                        type: 'subchapter',
-                        id: subchapter.id,
-                        title: subchapter.title,
-                        courseId: course.id,
-                        courseTitle: course.title,
-                        chapterId: chapter.chapterId,
-                        chapterTitle: chapter.title,
-                        subchapterId: subchapter.subchapterId,
-                        url: `/course/${course.id}?chapter=${chapter.chapterId}&subchapter=${subchapter.subchapterId}`,
-                        matchedContent
+        searchTimeout.current = setTimeout(async () => {
+            setLoading(true)
+            try {
+                const response = await pagefind.search(query)
+                
+                // Load the first 15 results
+                const loadedResults = await Promise.all(
+                    response.results.slice(0, 15).map(async (result) => {
+                        const data = await result.data()
+                        return {
+                            type: data.meta.type,
+                            id: result.id,
+                            title: data.meta.title,
+                            description: data.meta.description,
+                            courseId: data.meta.courseId,
+                            courseTitle: data.meta.courseTitle,
+                            chapterId: data.meta.chapterId,
+                            chapterTitle: data.meta.chapterTitle,
+                            subchapterId: data.meta.subchapterId,
+                            url: data.url,
+                            excerpt: data.excerpt
+                        } as SearchResult
                     })
-                }
+                )
+                
+                setResults(loadedResults)
+                setSelectedIndex(0)
+            } catch (error) {
+                console.error('Search error:', error)
+            } finally {
+                setLoading(false)
+            }
+        }, 150) // 150ms debounce
+
+        return () => {
+            if (searchTimeout.current) {
+                clearTimeout(searchTimeout.current)
             }
         }
+    }, [query, pagefind])
 
-        // Sort: courses first, then chapters, then subchapters
-        // Within each type, prioritize title matches over content matches
-        return results.slice(0, 20) // Limit results
-    }, [query, courses, chapters, subchapters])
+    const navigateToResult = useCallback((result: SearchResult) => {
+        // The URLs from pagefind don't include basePath, just use them directly
+        console.log('Navigating to:', result.url)
+        router.push(result.url)
+        onOpenChange(false)
+    }, [router, onOpenChange])
 
     // Keyboard navigation
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -162,15 +165,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             setSelectedIndex(i => Math.max(i - 1, 0))
         } else if (e.key === 'Enter' && results[selectedIndex]) {
             e.preventDefault()
-            router.push(results[selectedIndex].url)
-            onOpenChange(false)
+            navigateToResult(results[selectedIndex])
         }
-    }, [results, selectedIndex, router, onOpenChange])
-
-    const navigateToResult = (result: SearchResult) => {
-        router.push(result.url)
-        onOpenChange(false)
-    }
+    }, [results, selectedIndex, navigateToResult])
 
     const getIcon = (type: SearchResult['type']) => {
         switch (type) {
@@ -198,6 +195,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-base"
                         autoFocus
                     />
+                    {loading && (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
+                    )}
                     <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-muted px-2 font-mono text-xs text-muted-foreground ml-2">
                         ESC
                     </kbd>
@@ -205,7 +205,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
                 {/* Results */}
                 <div className="max-h-[60vh] overflow-y-auto">
-                    {query.trim() === '' ? (
+                    {pagefindError ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                            <Search className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                            <p className="text-sm">{pagefindError}</p>
+                        </div>
+                    ) : query.trim() === '' ? (
                         <div className="p-8 text-center text-muted-foreground">
                             <Search className="h-12 w-12 mx-auto mb-4 opacity-20" />
                             <p className="text-sm">Start typing to search across all courses and content</p>
@@ -221,7 +226,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                                 </span>
                             </div>
                         </div>
-                    ) : results.length === 0 ? (
+                    ) : results.length === 0 && !loading ? (
                         <div className="p-8 text-center text-muted-foreground">
                             <p>No results found for &quot;{query}&quot;</p>
                         </div>
@@ -260,10 +265,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                                                 <span>{result.courseTitle} → {result.chapterTitle}</span>
                                             )}
                                         </div>
-                                        {result.matchedContent && (
-                                            <div className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">
-                                                &quot;{result.matchedContent}&quot;
-                                            </div>
+                                        {result.excerpt && (
+                                            <div 
+                                                className="text-xs text-muted-foreground mt-1 line-clamp-2"
+                                                dangerouslySetInnerHTML={{ __html: result.excerpt }}
+                                            />
                                         )}
                                     </div>
                                     <div className="shrink-0">
