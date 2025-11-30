@@ -151,10 +151,15 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
     const navigateToResult = useCallback((result: SearchResult) => {
         // The URLs from pagefind don't include basePath, just use them directly
-        console.log('Navigating to:', result.url)
-        router.push(result.url)
+        // Append the search query as a highlight param
+        const separator = result.url.includes('?') ? '&' : '?'
+        const urlWithHighlight = query.trim() 
+            ? `${result.url}${separator}highlight=${encodeURIComponent(query.trim())}`
+            : result.url
+        console.log('Navigating to:', urlWithHighlight)
+        router.push(urlWithHighlight)
         onOpenChange(false)
-    }, [router, onOpenChange])
+    }, [router, onOpenChange, query])
 
     // Scroll selected item into view
     useEffect(() => {

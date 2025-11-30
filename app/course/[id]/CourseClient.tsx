@@ -21,6 +21,7 @@ export default function CourseClient() {
     const courseId = params.id as string
     const chapterId = searchParams.get('chapter')
     const subchapterId = searchParams.get('subchapter')
+    const highlightText = searchParams.get('highlight')
 
     const [isNotesPanelCollapsed, setIsNotesPanelCollapsed] = useState(false)
     const [openParts, setOpenParts] = useState<Set<string>>(new Set())
@@ -411,7 +412,7 @@ export default function CourseClient() {
                                 <article className="max-w-3xl mx-auto pb-6 sm:pb-8">
                                     {/* Hide duplicate chapter title on small screens since it's in the content */}
                                     <h2 className="hidden sm:block text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{displayTitle}</h2>
-                                    <MarkdownRenderer content={displayContent} />
+                                    <MarkdownRenderer content={displayContent} highlightText={highlightText || undefined} />
                                 </article>
 
                                 {/* Chapter Navigation */}
