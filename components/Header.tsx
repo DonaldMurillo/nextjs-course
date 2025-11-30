@@ -5,13 +5,17 @@ import Link from "next/link"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { SettingsMenu } from "@/components/SettingsMenu"
-import { Moon, Sun, BookOpen, Menu, X } from "lucide-react"
+import { SearchModal, useSearchModal, SearchTrigger } from "@/components/SearchModal"
+import { Moon, Sun, BookOpen, Menu, X, Search } from "lucide-react"
 
 export function Header() {
     const { theme, setTheme } = useTheme()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const { open: searchOpen, setOpen: setSearchOpen } = useSearchModal()
 
     return (
+        <>
+        <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
             <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 font-bold text-lg sm:text-xl">
@@ -20,7 +24,9 @@ export function Header() {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-6">
+                <nav className="hidden md:flex items-center gap-4">
+                    <SearchTrigger onClick={() => setSearchOpen(true)} />
+                    
                     <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
                         Dashboard
                     </Link>
@@ -42,7 +48,16 @@ export function Header() {
                 </nav>
 
                 {/* Mobile Navigation */}
-                <div className="flex md:hidden items-center gap-2">
+                <div className="flex md:hidden items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSearchOpen(true)}
+                    >
+                        <Search className="h-5 w-5" />
+                        <span className="sr-only">Search</span>
+                    </Button>
+                    
                     <Button
                         variant="ghost"
                         size="icon"
@@ -88,5 +103,6 @@ export function Header() {
                 </div>
             )}
         </header>
+        </>
     )
 }
