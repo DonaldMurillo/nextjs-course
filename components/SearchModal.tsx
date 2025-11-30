@@ -67,6 +67,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     const [pagefindError, setPagefindError] = useState<string | null>(null)
     const searchTimeout = useRef<NodeJS.Timeout | null>(null)
     const prevOpen = useRef(open)
+    const resultRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
 
     // Initialize PageFind
     useEffect(() => {
@@ -155,6 +156,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         onOpenChange(false)
     }, [router, onOpenChange])
 
+    // Scroll selected item into view
+    useEffect(() => {
+        const selectedElement = resultRefs.current.get(selectedIndex)
+        if (selectedElement) {
+            selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        }
+    }, [selectedIndex])
+
     // Keyboard navigation
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'ArrowDown') {
@@ -235,6 +244,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                             {results.map((result, index) => (
                                 <button
                                     key={`${result.type}-${result.id}`}
+                                    ref={(el) => {
+                                        if (el) resultRefs.current.set(index, el)
+                                        else resultRefs.current.delete(index)
+                                    }}
                                     onClick={() => navigateToResult(result)}
                                     onMouseEnter={() => setSelectedIndex(index)}
                                     className={cn(
