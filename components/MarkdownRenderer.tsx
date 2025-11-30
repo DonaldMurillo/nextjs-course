@@ -107,17 +107,26 @@ export function MarkdownRenderer({ content, className, highlightText }: Markdown
             "prose-headings:scroll-mt-20",
             // Inline code styles - remove backticks
             "prose-code:before:content-none prose-code:after:content-none",
-            // Table styles
-            "prose-table:border-collapse prose-table:w-full",
-            "prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800",
-            "prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2",
+            // Table styles - responsive with horizontal scroll container
+            "prose-table:border-collapse prose-table:w-full prose-table:text-sm prose-table:min-w-0",
+            "prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-2 prose-th:sm:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-th:text-xs prose-th:sm:text-sm",
+            "prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-2 prose-td:sm:px-4 prose-td:py-2 prose-td:text-xs prose-td:sm:text-sm",
             // Link styles
             "prose-a:text-blue-600 prose-a:dark:text-blue-400",
+            // Prevent overall horizontal overflow
+            "*:max-w-full [&_pre]:overflow-x-auto [&_pre]:max-w-full",
             className
         )}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeHighlight]}
+                components={{
+                    table: ({ children }) => (
+                        <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+                            <table className="min-w-full">{children}</table>
+                        </div>
+                    ),
+                }}
             >
                 {content}
             </ReactMarkdown>
