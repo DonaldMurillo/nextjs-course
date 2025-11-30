@@ -99,57 +99,63 @@ export function CourseHeader({ courseId, chapterId, subchapterId, title }: Cours
     }
 
     return (
-        <div className="flex items-center justify-between border-b pb-4 mb-6">
-            <div className="flex items-center gap-4">
+        <div className="border-b pb-3 sm:pb-4 mb-4 sm:mb-6">
+            {/* Top row: Back button and title */}
+            <div className="flex items-center gap-2 sm:gap-4 mb-3">
                 <Link href="/">
-                    <Button variant="ghost" size="icon" className="hover:bg-accent">
+                    <Button variant="ghost" size="icon" className="hover:bg-accent h-8 w-8 sm:h-9 sm:w-9 shrink-0">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                 </Link>
-                <h1 className="text-xl font-bold truncate max-w-[300px] md:max-w-[600px]">
+                <h1 className="text-base sm:text-xl font-bold truncate flex-1">
                     {title}
                 </h1>
             </div>
-
-            <div className="flex gap-2">
+            
+            {/* Bottom row: Action buttons - responsive layout */}
+            <div className="flex flex-wrap items-center gap-2 pl-0 sm:pl-12">
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={toggleCompletion}
-                    className="gap-2 hover:bg-accent transition-colors cursor-pointer"
+                    className="gap-1.5 sm:gap-2 hover:bg-accent transition-colors cursor-pointer text-xs sm:text-sm h-8 sm:h-9"
                 >
                     {progress?.completed ? (
                         <>
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            Completed
+                            <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
+                            <span className="hidden xs:inline">Completed</span>
+                            <span className="xs:hidden">Done</span>
                         </>
                     ) : (
                         <>
-                            <Circle className="h-4 w-4" />
-                            Mark Complete
+                            <Circle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden xs:inline">Mark Complete</span>
+                            <span className="xs:hidden">Complete</span>
                         </>
                     )}
                 </Button>
 
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!prevItem}
-                    onClick={() => prevItem && navigateTo(prevItem)}
-                    className="hover:bg-accent transition-colors cursor-pointer disabled:cursor-not-allowed"
-                >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Prev
-                </Button>
-                <Button
-                    size="sm"
-                    disabled={!nextItem}
-                    onClick={() => nextItem && navigateTo(nextItem)}
-                    className="hover:bg-primary/90 transition-colors cursor-pointer disabled:cursor-not-allowed"
-                >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+                <div className="flex gap-1.5 sm:gap-2 ml-auto">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!prevItem}
+                        onClick={() => prevItem && navigateTo(prevItem)}
+                        className="hover:bg-accent transition-colors cursor-pointer disabled:cursor-not-allowed h-8 sm:h-9 px-2 sm:px-3"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-1">Prev</span>
+                    </Button>
+                    <Button
+                        size="sm"
+                        disabled={!nextItem}
+                        onClick={() => nextItem && navigateTo(nextItem)}
+                        className="hover:bg-primary/90 transition-colors cursor-pointer disabled:cursor-not-allowed h-8 sm:h-9 px-2 sm:px-3"
+                    >
+                        <span className="hidden sm:inline mr-1">Next</span>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         </div>
     )
